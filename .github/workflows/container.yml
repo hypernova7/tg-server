@@ -1,0 +1,52 @@
+name: Docker Container
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: "0 0 * * *"
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    env:
+      HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+      FORCE_DEPLOY: ${{ secrets.FORCE_DEPLOY }} # optional
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Checkout upstream repo
+        uses: actions/checkout@v2
+        with:
+          repository: tdlib/telegram-bot-api
+          path: telegram-bot-api
+          submodules: recursive
+      - name: Cache
+        uses: actions/cache@main
+        with:
+          path: ~/tmp/.cache
+          key: ${{ runner.os }}-tg-server-${{ github.sha }}
+      - name: Check for telegram-bot-api updates
+        id: checkout
+        run: |
+          make update
+          echo ::set-output name=deploy::$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
+          echo ::set-output name=deploy::$([ "$FORCE_DEPLOY" != "true" ] && echo "false" || echo "true")
+      - name: Deploy Docker Container to Heroku
+        if: steps.checkout.outputs.deploy == 'true'
+        run: |
+          cat <<EOF >~/.netrc
+            machine api.heroku.com
+              login ${HEROKU_EMAIL}
+              password ${HEROKU_API_KEY}
+            machine git.heroku.com
+              login ${HEROKU_EMAIL}
+              password ${HEROKU_API_KEY}
+          EOF
+          heroku container:login
+          make release appname=$HEROKU_APP_NAME
