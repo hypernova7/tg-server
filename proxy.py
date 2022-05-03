@@ -23,11 +23,11 @@ def token_restriction_check(u_path:str):
   token, *args, filename = u_path.split('/')
   token = sanitize(token)
 
-  # Restriction check
-  if token not in allowedBotTokens:
-    abort(403)
-  
-  return token, filename
+  # Allowed bots
+  if token in allowedBotTokens:  
+    return token, filename
+  abort(403)                              #restrict
+
 
 
 def get_headers(res:reqResponse):
@@ -55,15 +55,14 @@ def file(u_path:str):
   # Check remote file existance for faster
   filename = token_restriction_check(u_path)[1]                                                      # Token restriction check
   res = request(req)
-  if res.status_code != codes.ok:
-    return abort(404)
-  
-  return send_file(
-    path_or_file=f'/{sanitize(u_path)}',
-    mimetype=res.headers['Content-Type'],
-    download_name=filename,
-    as_attachment=True
-  )
+  if res.status_code == codes.ok:
+    return send_file(
+      path_or_file=f'/{sanitize(u_path)}',
+      mimetype=res.headers['Content-Type'],
+      download_name=filename,
+      as_attachment=True
+    )
+  abort(404)
 
 
 @app.route('/', defaults={'u_path': ''})
