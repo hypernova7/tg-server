@@ -40,9 +40,10 @@ def request(req):
     data=req.get_data()
   )
 
+
 @app.route('/file/<path:u_path>')
-def file(u_path):
-  token, *__, filename = u_path.split('/')
+def file(u_path:str):
+  token, *args, filename = u_path.split('/')
   token = sanitize(token)
 
   if is_restricted(token):
@@ -64,8 +65,8 @@ def file(u_path):
 
 @app.route('/', defaults={'u_path': ''})
 @app.route('/<path:u_path>')
-def api(u_path):
-  token, *__ = u_path.split('/')
+def api(u_path:str):
+  token, *args = u_path.split('/')
   token = sanitize(token)
 
   if is_restricted(token):
