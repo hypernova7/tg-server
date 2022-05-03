@@ -22,7 +22,7 @@ heroku apps:create <heroku-app-name>
 ### Add required environmet vars
 
 ```bash
-heroku config:add ALLOWED_BOT_TOKENS=<bottoken> -a <heroku-app-name>
+heroku config:add ALLOWED_BOT_TOKENS=<bottokens-seperated-by-newline> -a <heroku-app-name>
 heroku config:add TELEGRAM_API_ID=<api-id> TELEGRAM_API_HASH=<api-hash> -a <heroku-app-name>
 # NOTE: To pass extra arguments to telegram-bot-api, you can add the environment var EXTRA_ARGS
 heroku config:add EXTRA_ARGS="--proxy=<proxy> --local" -a <heroku-app-name>
