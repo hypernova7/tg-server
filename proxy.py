@@ -2,27 +2,32 @@
   Proxy to restrict bots that are not owned by you
 """
 from os import environ as env
-from requests import request as got, codes
+from requests import request as got, codes, Response as reqResponse
 from flask import Flask, abort, request as req, send_file
 from flask.wrappers import Response
+
 
 app = Flask(__name__)
 allowedBotTokens = env.get('ALLOWED_BOT_TOKENS', '').split('\n')
 excludedHeaders = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
 
+
 def sanitize(str):
   return str.replace('bot', '')
+
 
 def is_restricted(token):
   if token not in allowedBotTokens:
     return True
   return False
 
-def headers(res):
+
+def get_headers(res:reqResponse):
   return [
     (name, value) for (name, value) in res.raw.headers.items()
       if name.lower() not in excludedHeaders
   ]
+
 
 def request(req):
   return got(
@@ -55,6 +60,7 @@ def file(u_path):
   else:
     return abort(404)
 
+
 @app.route('/', defaults={'u_path': ''})
 @app.route('/<path:u_path>')
 def api(u_path):
@@ -68,7 +74,7 @@ def api(u_path):
   return Response(
     response=res.content,
     status=res.status_code,
-    headers=headers(res)
+    headers=get_headers(res)
   )
 
 if __name__ == '__main__':
