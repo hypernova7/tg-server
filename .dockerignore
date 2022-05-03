@@ -1,2 +1,3 @@
 ./data
 .github
+__pycache__
