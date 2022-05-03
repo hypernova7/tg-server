@@ -2,7 +2,6 @@
   Proxy to restrict bots that are not owned by you
 """
 from os import environ as env
-from typing import Callable
 from requests import request as got, codes, Response as reqResponse
 from flask import Flask, abort, request as req, send_file
 from flask.wrappers import Response
@@ -18,9 +17,7 @@ def sanitize(var:str):
 
 
 def is_restricted(token:str):
-  if token not in allowedBotTokens:
-    return True
-  return False
+  return token not in allowedBotTokens
 
 
 def get_headers(res:reqResponse):
