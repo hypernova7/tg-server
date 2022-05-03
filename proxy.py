@@ -14,13 +14,21 @@ excludedHeaders = ['content-encoding', 'content-length', 'transfer-encoding', 'c
 
 
 
+def token_restriction_check(u_path:str):
+  """ Returns: `(token, filename)` if not restricted, else raises `HTTPException` """
+  token, *args, filename = u_path.split('/')
+  token = sanitize(token)
+
+  # Restriction check
+  if token not in allowedBotTokens:
+    abort(403)
+  
+  return token, filename
+
+
 
 def sanitize(var:str):
   return var.replace('bot', '')
-
-
-def is_restricted(token:str):
-  return token not in allowedBotTokens
 
 
 def get_headers(res:reqResponse):
@@ -42,15 +50,11 @@ def request(req):
   )
 
 
+
 @app.route('/file/<path:u_path>')
 def file(u_path:str):
-  token, *args, filename = u_path.split('/')
-  token = sanitize(token)
-
-  if is_restricted(token):
-    return abort(403)
-
   # Check remote file existance for faster
+  filename = token_restriction_check(u_path)[1]                                                      # Token restriction check
   res = request(req)
   if res.status_code != codes.ok:
     return abort(404)
@@ -66,12 +70,7 @@ def file(u_path:str):
 @app.route('/', defaults={'u_path': ''})
 @app.route('/<path:u_path>')
 def api(u_path:str):
-  token, *args = u_path.split('/')
-  token = sanitize(token)
-
-  if is_restricted(token):
-    return abort(403)
-
+  token_restriction_check(u_path)                                                                  # Token restriction check
   res = request(req)
   return Response(response=res.content, status=res.status_code, headers=get_headers(res))
 
