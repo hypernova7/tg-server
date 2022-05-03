@@ -14,6 +14,10 @@ excludedHeaders = ['content-encoding', 'content-length', 'transfer-encoding', 'c
 
 
 
+def sanitize(var:str):
+  return var.replace('bot', '')
+
+
 def token_restriction_check(u_path:str):
   """ Returns: `(token, filename)` if not restricted, else raises `HTTPException` """
   token, *args, filename = u_path.split('/')
@@ -24,11 +28,6 @@ def token_restriction_check(u_path:str):
     abort(403)
   
   return token, filename
-
-
-
-def sanitize(var:str):
-  return var.replace('bot', '')
 
 
 def get_headers(res:reqResponse):
