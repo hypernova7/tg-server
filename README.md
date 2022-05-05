@@ -1,8 +1,19 @@
-# Deploy Docker Container to Heroku with [Telegram Bot API](https://github.com/tdlib/telegram-bot-api) and NGINX
+# Deploy Docker Container to Heroku with [Telegram Bot API](https://github.com/tdlib/telegram-bot-api) and NGINX + uWSGI
+
 
 ### Inspired on [aiogram](https://github.com/aiogram/telegram-bot-api)
+----
 
-## Steps
+
+## :sparkles: Features
+
+- Zero config
+- Bot restrictions
+- [telegram-bot-api](https://github.com/tdlib/telegram-bot-api) easy buld
+- Automated deployment with Github Actions
+- Your own API endpoint(`https://yourdomain.com/bot<token>/getMe`) to have [extra features](https://github.com/tdlib/telegram-bot-api) that the original API does not provide
+
+## :point_down: Steps
 
 > **IMPORTANT!!** To complete these steps you need to install [Docker Engine](https://docs.docker.com/engine/install/), [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
 
@@ -13,6 +24,8 @@
 git clone https://github.com/hypernova7/tg-server.git
 cd tg-server
 ```
+
+
 ### Create a Heroku app
 
 ```bash
@@ -20,6 +33,7 @@ cd tg-server
 heroku auth:login
 heroku apps:create <heroku-app-name>
 ```
+
 
 ### Add required environmet vars
 
@@ -31,6 +45,7 @@ heroku config:add TELEGRAM_API_ID=<api-id> TELEGRAM_API_HASH=<api-hash> -a <hero
 # NOTE: To pass extra arguments to telegram-bot-api, you can add the environment var EXTRA_ARGS
 heroku config:add EXTRA_ARGS="--proxy=<proxy> --local" -a <heroku-app-name>
 ```
+
 
 ### Push container to heroku
 
@@ -46,14 +61,15 @@ heroku container:release web -a <heroku-app-name>
 ```
 
 
-# With Github Actions
+## :zap: Automated deployment with Github Actions
+
 
 ### You can deploy your Docker Container to Heroku in a fully automated way, thanks to the power of Github Actions.
 
 This repository already provides a pre-configured Github Action, you just need to clone and create a private repository with all the configuration provided in this repository for your Docker Container. Then simply add the following secrets in `repository settings > secrets` to your private repository.
 
 
-> **NOTE**: The Github Action provided in this repository is scheduled to check for updates to the `telegram-bot-api` submodule and deploy if there are any changes every day. Optionally, you can add `FORCE_DEPLOY=true` to your repository secrets, to deploy the changes every time you push your own changes but be careful, the Github Action is scheduled to run every day at 12am UTC.
+> **NOTE**: The Github Action provided in this repository is scheduled to check for updates to the `telegram-bot-api` submodule and deploy if there are any changes every day. Optionally, you can add `FORCE_DEPLOY=true` to your repository secrets, to deploy the changes every time you push your own changes **but be careful, the Github Action is scheduled to run every day at 12am UTC**.
 
 
 ```
@@ -63,6 +79,6 @@ HEROKU_APP_NAME=<heroku-app-name>
 ```
 
 
-# Any issue?
+## :bug: Any issue?
 
-### Please open a new issue https://github.com/hypernova7/tg-server/issues
+### Please [open a new issue](https://github.com/hypernova7/tg-server/issues)

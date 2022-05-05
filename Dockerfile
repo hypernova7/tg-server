@@ -16,8 +16,9 @@ FROM alpine:3.15
 ENV TELEGRAM_WORK_DIR="/file" \
     TELEGRAM_TEMP_DIR="/tmp"
 
-RUN apk add --no-cache --update openssl libstdc++ nginx python3 py3-pip
+RUN apk add --no-cache --update openssl libstdc++ nginx python3 py3-pip uwsgi-python3 uwsgi-http
 COPY proxy.py /proxy.py
+COPY uwsgi.yml /uwsgi.yml
 COPY requirements.txt /requirements.txt
 COPY nginx/mime.types /etc/nginx/conf.d/mime.types
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
@@ -31,6 +32,6 @@ RUN addgroup -g 777 -S telegram-bot-api \
 RUN pip3 install -r /requirements.txt
 
 CMD (telegram-bot-api -p 8081 --api-id=$TELEGRAM_API_ID --api-hash=$TELEGRAM_API_HASH --dir=/file --temp-dir=/tmp $EXTRA_ARGS) & \
-  (gunicorn -w 8 --worker-connections 65535 -b 127.0.0.1:8282 proxy:app) & \
+  (uwsgi --ini /uwsgi.yml) & \
   sed -i "s/__PORT__/$PORT/g" /etc/nginx/conf.d/default.conf \
   && nginx -p /telegram-bot-api -c /etc/nginx/conf.d/default.conf
