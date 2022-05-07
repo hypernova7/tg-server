@@ -96,7 +96,8 @@ def file(u_path: str):
     return make_error(401)
 
   # Check if file exists via HTTP request for more faster
-  res = request()
+  bot_id = token.split(':', 1)[0]
+  res = request(reqUrl=tokenized_url(bot_id))
 
   if res.status_code != 200:
     return make_error(404)
