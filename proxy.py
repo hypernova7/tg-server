@@ -9,13 +9,24 @@ from flask import Flask, request as req, send_file
 from flask.json import jsonify
 from flask_cors import CORS
 
+
+# Init
 app: Flask = Flask(__name__)
 CORS(app)
-allowedBotIds = env.get('ALLOWED_BOT_IDS', '').split(',')
 errors = {
   '401': {'ok': False, 'error_code': 401, 'description': 'Unauthorized'},
   '404': {'ok': False, 'error_code': 404, 'description': 'Not found'}
 }
+
+# Allowed bots data from env
+allowedBots = env.get('ALLOWED_BOT_IDS', '').split(',')
+allowedBotIds :dict[str, str|None] = {}                         # {botid: bot-token}
+for i in allowedBots:
+  if ':' in i:    botID, botToken = i.split(':', 1)
+  else:           botID, botToken = i, None
+  allowedBotIds.update({botID: botToken})
+
+
 
 def sanitize(token: str) -> str:
   return token.replace('bot', '', 1)
