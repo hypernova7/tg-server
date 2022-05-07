@@ -2,7 +2,7 @@
   Credits to https://github.com/sayyid5416
   Proxy to restrict bots that are not owned by you
 """
-from typing import List
+from typing import List, Union
 from os import environ as env
 from requests import request as got
 from flask import Flask, request as req, send_file
@@ -20,7 +20,7 @@ errors = {
 
 # Allowed bots data from env
 allowedBots = env.get('ALLOWED_BOT_IDS', '').split(',')
-allowedBotIds :dict[str, str|None] = {}                         # {botid: bot-token}
+allowedBotIds :dict[str, Union[str,None]] = {}                         # {botid: bot-token}
 for i in allowedBots:
   if ':' in i:    botID, botToken = i.split(':', 1)
   else:           botID, botToken = i, None
@@ -32,7 +32,7 @@ def sanitize(token: str) -> str:
   return token.replace('bot', '', 1)
 
 
-def is_unauthorized(token: str|None):
+def is_unauthorized(token: Union[str,None]):
   bot_id = token.split(':')[0] if token else None
   return bot_id not in allowedBotIds or token is None
 
@@ -55,7 +55,7 @@ def unpack(source: List[str], target: int, default_value=None):
   return source
 
 
-def request(reqUrl:str|None=None):
+def request(reqUrl:Union[str,None]=None):
   """ Send all HTTP request to telegram-bot-api local server 
   - If `reqUrl` is passed, it would be used instead of `req.url` for the url argument
   """
