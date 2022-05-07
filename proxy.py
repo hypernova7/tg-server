@@ -21,8 +21,8 @@ def sanitize(token: str) -> str:
   return token.replace('bot', '', 1)
 
 
-def is_unauthorized(token: str):
-  bot_id, token = unpack(sanitize(token).split(':'), 2)
+def is_unauthorized(token: str|None):
+  bot_id = token.split(':')[0] if token else None
   return bot_id not in allowedBotIds or token is None
 
 
@@ -49,8 +49,7 @@ def request():
   rdata = req.get_data() # Capture data before cleaning
   content_type = 'application/json' # Fix Content-Type header when opening URL in browser
 
-  if 'Content-Type' in req.headers:
-    content_type = req.headers['Content-Type']
+  if 'Content-Type' in req.headers:   content_type = req.headers['Content-Type']
 
   return got(
     method=req.method,
