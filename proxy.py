@@ -5,32 +5,34 @@
 from typing import List
 from os import environ as env
 from requests import request as got
-from flask import Flask, abort, request as req, send_file
-from flask.wrappers import Response
+from flask import Flask, request as req, send_file
+from flask.json import jsonify
+from flask_cors import CORS
 
-app = Flask(__name__)
+app: Flask = Flask(__name__)
+CORS(app)
 allowedBotIds = env.get('ALLOWED_BOT_IDS', '').split(',')
-excludedHeaders = [
-  'content-encoding',
-  'content-length',
-  'transfer-encoding',
-  'connection'
-]
-
+errors = {
+  '401': {'ok': False, 'error_code': 401, 'description': 'Unauthorized'},
+  '404': {'ok': False, 'error_code': 404, 'description': 'Not found'}
+}
 
 def sanitize(token: str) -> str:
-  return token.replace('bot', '')
+  return token.replace('bot', '', 1)
 
 
-def not_allowed(bot_id: str):
-  return bot_id not in allowedBotIds
+def is_unauthorized(token: str):
+  bot_id, token = unpack(sanitize(token).split(':'), 2)
+  return bot_id not in allowedBotIds or token is None
 
 
-def get_headers(res):
-  return [
-    (name, value) for name, value in res.raw.headers.items()
-    if name.lower() not in excludedHeaders
-  ]
+def make_error(code: int):
+  return jsonify(errors[str(code)]), code
+
+
+def get_path_data(path: str):
+  token, *__, filename = unpack(path.split('/'), 5)
+  return filename, token
 
 
 def unpack(source: List[str], target: int, default_value=None):
@@ -42,38 +44,36 @@ def unpack(source: List[str], target: int, default_value=None):
   return source
 
 
-def get_path_data(path: str):
-  token, *__, filename = unpack(path.split('/'), 3)
-  token: str = sanitize(token)
-  bot_id: str = token.split(':')[0]
-  return bot_id, filename
-
-
 def request():
-  """ Send all HTTP request to telegram-bot-api local server, don't modify """
+  """ Send all HTTP request to telegram-bot-api local server """
+  rdata = req.get_data() # Capture data before cleaning
+  content_type = 'application/json' # Fix Content-Type header when opening URL in browser
+
+  if 'Content-Type' in req.headers:
+    content_type = req.headers['Content-Type']
+
   return got(
-    method='POST',
-    allow_redirects=False,
+    method=req.method,
     url=req.url.replace(req.host_url, 'http://127.0.0.1:8081/'),
-    headers={key: value for (key, value) in req.headers if key != 'Host'},
-    cookies=req.cookies,
-    data=req.get_data()
+    headers={'Content-Type': content_type, 'Connection': 'keep-alive'},
+    params=req.args,
+    data=rdata
   )
 
 
-@app.route('/file/<path:u_path>')
+@app.route('/file/<path:u_path>', methods=['GET'])
 def file(u_path: str):
   """ Handle local files """
-  bot_id, filename = get_path_data(u_path)
+  filename, token = get_path_data(u_path)
 
-  if not_allowed(bot_id):
-    abort(403)
+  if is_unauthorized(token):
+    return make_error(401)
 
   # Check if file exists via HTTP request for more faster
   res = request()
 
   if res.status_code != 200:
-    abort(404)
+    return make_error(404)
 
   return send_file(
     path_or_file=f'/{sanitize(u_path)}',
@@ -84,21 +84,16 @@ def file(u_path: str):
 
 
 @app.route('/', defaults={'u_path': ''})
-@app.route('/<path:u_path>')
+@app.route('/<path:u_path>', methods=['GET', 'POST'])
 def api(u_path: str):
-  """ Handle all API request"""
-  bot_id, *__ = get_path_data(u_path)
+  """ Handle all API request """
+  __, token = get_path_data(u_path)
 
-  if not_allowed(bot_id):
-    abort(403)
+  if is_unauthorized(token):
+    return make_error(401)
 
   res = request()
-
-  return Response(
-    response=res.content,
-    status=res.status_code,
-    headers=get_headers(res)
-  )
+  return jsonify(res.json()), res.status_code
 
 
 if __name__ == '__main__':
