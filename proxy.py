@@ -74,6 +74,19 @@ def request(reqUrl:str|None=None):
   )
 
 
+def tokenized_url(bot_id:str):
+  """ Returns: `Request.request.url` after appending bot-token to it (if not present) """
+  # Original url
+  reqUrl = req.url
+  
+  # If bot-token absent in URL but present in ALLOWED_BOT_IDS -> append bot-token to url
+  botToken = allowedBotIds.get(bot_id)
+  if botToken and f'{bot_id}:' not in reqUrl:                           # ':' defines if a token is present or not
+    reqUrl = reqUrl.replace(bot_id, f'{bot_id}:{botToken}')
+    
+  return reqUrl
+
+
 @app.route('/file/<path:u_path>', methods=['GET'])
 def file(u_path: str):
   """ Handle local files """
