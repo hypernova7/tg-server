@@ -57,19 +57,17 @@ def unpack(source: List[str], target: int, default_value=None):
   return source
 
 
-def request(reqUrl:Union[str,None]=None):
-  """ Send all HTTP request to telegram-bot-api local server 
-  - If `reqUrl` is passed, it would be used instead of `req.url` for the url argument
-  """
-  rdata = req.get_data() # Capture data before cleaning
-  content_type = 'application/json' # Fix Content-Type header when opening URL in browser
+def request():
+  """ Send all HTTP request to telegram-bot-api local server """
+  rdata = req.get_data()                                        # Capture data before cleaning
+  content_type = 'application/json'                             # Fix Content-Type header when opening URL in browser
 
-  if 'Content-Type' in req.headers:   content_type = req.headers['Content-Type']
-  if reqUrl is None:                  reqUrl = req.url
+  if 'Content-Type' in req.headers:
+    content_type = req.headers['Content-Type']
 
   return got(
     method=req.method,
-    url=reqUrl.replace(req.host_url, 'http://127.0.0.1:8081/'),
+    url=req.url.replace(req.host_url, 'http://127.0.0.1:8081/'),
     headers={'Content-Type': content_type, 'Connection': 'keep-alive'},
     params=req.args,
     data=rdata
