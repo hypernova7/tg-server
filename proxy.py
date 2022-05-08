@@ -2,6 +2,7 @@
   Credits to https://github.com/sayyid5416
   Proxy to restrict bots that are not owned by you
 """
+import os
 from typing import List, Union
 from os import environ as env
 from requests import request as got
@@ -75,19 +76,6 @@ def request(reqUrl:Union[str,None]=None):
   )
 
 
-def tokenized_url(bot_id:str):
-  """ Returns: `Request.request.url` after appending bot-token to it (if not present) """
-  # Original url
-  reqUrl = req.url
-  
-  # If bot-token absent in URL but present in ALLOWED_BOT_IDS -> append bot-token to url
-  botToken = allowedBotIds.get(bot_id)
-  if botToken and f'{bot_id}:' not in reqUrl:                           # ':' defines if a token is present or not
-    reqUrl = reqUrl.replace(bot_id, f'{bot_id}:{botToken}')
-    
-  return reqUrl
-
-
 @app.route('/file/<path:u_path>', methods=['GET'])
 def file(u_path: str):
   """ Handle local files """
@@ -98,14 +86,18 @@ def file(u_path: str):
 
   # Check if file exists via HTTP request for more faster
   bot_id = token.split(':', 1)[0]
-  res = request(reqUrl=tokenized_url(bot_id))
+  if f'{bot_id}:' not in u_path:                           # ':' defines if a token is present or not
+    botToken = allowedBotIds.get(bot_id)
+    if botToken:
+      u_path = u_path.replace(bot_id, f'{bot_id}:{botToken}', 1)
+  u_path = f'/file/{sanitize(u_path)}'
 
-  if res.status_code != 200:
+  if not os.path.exists(u_path):
     return make_error(404)
 
   return send_file(
-    path_or_file=f'/{sanitize(u_path)}',
-    mimetype=res.headers['content-type'],
+    path_or_file=u_path,
+    mimetype='application/octet-stream',
     download_name=filename,
     as_attachment=True
   )
