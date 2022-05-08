@@ -4,7 +4,6 @@
 """
 import os
 from typing import List, Union
-from os import environ as env
 from requests import request as got
 from flask import Flask, request as req, send_file
 from flask.json import jsonify
@@ -20,7 +19,7 @@ errors = {
 }
 
 # Allowed bots data from env
-allowedBots = env.get('ALLOWED_BOT_IDS', '').split(',')
+allowedBots = os.environ.get('ALLOWED_BOT_IDS', '').split(',')
 allowedBotIds :dict[str, Union[str,None]] = {}                         # {botid: bot-token}
 for i in allowedBots:
   if ':' in i:    botID, botToken = i.split(':', 1)
