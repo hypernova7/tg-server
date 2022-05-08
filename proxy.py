@@ -42,8 +42,8 @@ def make_error(code: int):
 
 
 def get_path_data(path: str):
-  path = sanitize(path)
-  token, *__, filename = unpack(path.split('/'), 5)
+  pathParts = sanitize(path).split('/')
+  filename, token = pathParts[-1], pathParts[0]
   return filename, token
 
 
