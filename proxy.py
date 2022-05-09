@@ -42,7 +42,7 @@ def make_error(code: int):
   return jsonify(errors[str(code)]), code
 
 
-def get_path_data(path: str):
+def get_path_data(path: Union[str,None]):
   """ Returns the filename and token from the path """
   pathParts = path.split('/') if path else [None]
   filename, token = pathParts[-1], pathParts[0]
