@@ -83,14 +83,14 @@ def file(u_path: str):
   if is_unauthorized(token):
     return make_error(401)
 
-  # Check if file exists via HTTP request for more faster
+  # Getting correct filepath for the file
   bot_id = token.split(':', 1)[0]
-  if f'{bot_id}:' not in u_path:                           # ':' defines if a token is present or not
+  if f'{bot_id}:' not in u_path:                           # ':' signifies if a token is present or not
     botToken = allowedBotIds.get(bot_id)
-    if botToken:
-      u_path = u_path.replace(bot_id, f'{bot_id}:{botToken}', 1)
+    if botToken: u_path = u_path.replace(bot_id, f'{bot_id}:{botToken}', 1)
   filePath = f'/file/{sanitize(u_path)}'
 
+  # Check if file exists
   if not os.path.exists(u_path):
     return make_error(404)
 
