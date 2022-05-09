@@ -35,7 +35,7 @@ def sanitize(token: str) -> str:
 def is_unauthorized(token: Union[str,None]):
   """ Returns True, if bot is unauthorized """
   bot_id = token.split(':')[0] if token else None
-  return bot_id not in allowedBotIds or token is None
+  return bot_id not in allowedBotIds
 
 
 def make_error(code: int):
