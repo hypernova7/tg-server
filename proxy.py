@@ -28,7 +28,7 @@ for i in allowedBots:
 
 
 
-def sanitize(token: Union[str, None]) -> str:
+def sanitize(token: Union[str, None]):
   return token if token is None else token.replace('bot', '', 1)
 
 
@@ -80,7 +80,7 @@ def file(u_path: str):
   """ Handle local files """
   filename, token = get_path_data(u_path)
 
-  if is_unauthorized(token):
+  if token is None or is_unauthorized(token):
     return make_error(401)
 
   # Getting correct filepath for the file
@@ -108,7 +108,7 @@ def api(u_path: str):
   """ Handle all API request """
   __, token = get_path_data(u_path)
 
-  if is_unauthorized(token):
+  if token is None or is_unauthorized(token):
     return make_error(401)
 
   res = request()
