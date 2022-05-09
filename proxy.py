@@ -18,9 +18,9 @@ errors = {
   '404': {'ok': False, 'error_code': 404, 'description': 'Not found'}
 }
 
-# Allowed bots data from env
-allowedBots = os.environ.get('ALLOWED_BOT_IDS', '').split(',')
-allowedBotIds :dict[str, Union[str,None]] = {}                         # {botid: bot-token}
+# [Parsing] Allowed bots data from env
+allowedBots = os.environ.get('ALLOWED_BOT_IDS', '').split(',')                    # botid,botid:bottoken,botid,....
+allowedBotIds :dict[str, Union[str,None]] = {}                                    # {botid: bot-token}
 for i in allowedBots:
   if ':' in i:    botID, botToken = i.split(':', 1)
   else:           botID, botToken = i, None
@@ -33,6 +33,7 @@ def sanitize(token: str) -> str:
 
 
 def is_unauthorized(token: Union[str,None]):
+  """ Returns True, if bot is unauthorized """
   bot_id = token.split(':')[0] if token else None
   return bot_id not in allowedBotIds or token is None
 
@@ -42,6 +43,7 @@ def make_error(code: int):
 
 
 def get_path_data(path: str):
+  """ Returns the filename and token from the path """
   pathParts = sanitize(path).split('/')
   filename, token = pathParts[-1], pathParts[0]
   return filename, token
