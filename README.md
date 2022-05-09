@@ -45,7 +45,8 @@ heroku config:add TELEGRAM_API_ID=<api-id> TELEGRAM_API_HASH=<api-hash> -a <hero
 # NOTE: To pass extra arguments to telegram-bot-api, you can add the environment var EXTRA_ARGS
 heroku config:add EXTRA_ARGS="--proxy=<proxy> --local" -a <heroku-app-name>
 ```
-
+> **Optionally,** you can add full-tokens to ALLOWED_BOT_IDS, if you want to avoid exposing your token when sharing links to your bot files.
+> Example: `ALLOWED_BOT_IDS=<bot-id>,<bot-id>:<bot-token>,<bot-id>`
 
 ### Push container to heroku
 
