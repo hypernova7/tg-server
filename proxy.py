@@ -91,7 +91,7 @@ def file(u_path: str):
   filePath = f'/file/{sanitize(u_path)}'
 
   # Check if file exists
-  if not os.path.exists(u_path):
+  if not os.path.exists(filePath):
     return make_error(404)
 
   return send_file(
