@@ -28,8 +28,8 @@ for i in allowedBots:
 
 
 
-def sanitize(token: str) -> str:
-  return token.replace('bot', '', 1)
+def sanitize(token: Union[str, None]) -> str:
+  return token if token is None else token.replace('bot', '', 1)
 
 
 def is_unauthorized(token: Union[str,None]):
@@ -44,9 +44,9 @@ def make_error(code: int):
 
 def get_path_data(path: str):
   """ Returns the filename and token from the path """
-  pathParts = sanitize(path).split('/') if path else [None]
+  pathParts = path.split('/') if path else [None]
   filename, token = pathParts[-1], pathParts[0]
-  return filename, token
+  return filename, sanitize(token)
 
 
 def unpack(source: List[str], target: int, default_value=None):
@@ -89,13 +89,13 @@ def file(u_path: str):
     botToken = allowedBotIds.get(bot_id)
     if botToken:
       u_path = u_path.replace(bot_id, f'{bot_id}:{botToken}', 1)
-  u_path = f'/file/{sanitize(u_path)}'
+  filePath = f'/file/{sanitize(u_path)}'
 
   if not os.path.exists(u_path):
     return make_error(404)
 
   return send_file(
-    path_or_file=u_path,
+    path_or_file=filePath,
     mimetype='application/octet-stream',
     download_name=filename,
     as_attachment=True
