@@ -47,7 +47,7 @@ heroku config:add EXTRA_ARGS="--proxy=<proxy> --local" -a <heroku-app-name>
 ```
 > Additionally, you can add bot-tokens too _(along with bot-id)_ for any bot, in ALLOWED_BOT_IDS.
 > This way, you can get the files from server, without the need of bot token _(for that bot)_. _(Token won't be exposed)_
-> Example: ALLOWED_BOT_IDS=<bot-id>,<bot-id>:<bot-token>,<bot-id>
+> Example: `ALLOWED_BOT_IDS=<bot-id>,<bot-id>:<bot-token>,<bot-id>`
 
 ### Push container to heroku
 
