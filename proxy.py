@@ -44,7 +44,7 @@ def make_error(code: int):
 
 def get_path_data(path: str):
   """ Returns the filename and token from the path """
-  pathParts = sanitize(path).split('/')
+  pathParts = sanitize(path).split('/') if path else [None]
   filename, token = pathParts[-1], pathParts[0]
   return filename, token
 
