@@ -1,4 +1,4 @@
-# Deploy Docker Container to Heroku with [Telegram Bot API](https://github.com/tdlib/telegram-bot-api) and NGINX + uWSGI
+# Deploy Docker Container to Heroku with [Telegram Bot API](https://github.com/tdlib/telegram-bot-api) and NGINX + uWSGI support
 
 
 ### Inspired on [aiogram](https://github.com/aiogram/telegram-bot-api)
@@ -9,8 +9,8 @@
 
 - Zero config
 - Bot restrictions
-- [telegram-bot-api](https://github.com/tdlib/telegram-bot-api) easy buld
-- Automated deployment with Github Actions
+- [telegram-bot-api](https://github.com/tdlib/telegram-bot-api) easy build
+- Automated updates and deployment with Github Actions
 - Your own API endpoint(`https://yourdomain.com/bot<token>/getMe`) to have [extra features](https://github.com/tdlib/telegram-bot-api) that the original API does not provide
 
 ## :point_down: Steps
