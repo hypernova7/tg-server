@@ -74,7 +74,6 @@ This repository already provides a pre-configured Github Action, you just need t
 
 
 ```
-HEROKU_EMAIL=<heroku-email>
 HEROKU_API_KEY=<heroku-api-key>
 HEROKU_APP_NAME=<heroku-app-name>
 ```
