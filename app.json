@@ -3,6 +3,6 @@
   "name": "tgdev",
   "description": "Deploy Docker Container to Heroku with Telegram Bot API and NGINX",
   "repository": "https://github.com/hypernova7/tg-server",
-  "keywords": ["telegram-bot-api", "docker", "heroku", "nginx"],
+  "keywords": ["telegram-bot-api", "docker", "heroku", "nginx", "uwsgi"],
   "stack": "container"
 }

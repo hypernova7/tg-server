@@ -35,7 +35,7 @@ jobs:
         id: checkout
         run: |
           make update
-          echo ::set-output name=deploy::$([ "$FORCE_DEPLOY" != "false" ] && echo "true" || echo $([ -z "`git status --porcelain`" ] && echo "false" || echo "true"))
+          echo ::set-output name=deploy::$([[ -z "$FORCE_DEPLOY" && "$FORCE_DEPLOY" != "true" ]] && echo $([ -z "`git status --porcelain`" ] && echo "false" || echo "true") || echo "true")
       - name: Deploy Docker Container to Heroku
         if: steps.checkout.outputs.deploy == 'true'
         run: |
