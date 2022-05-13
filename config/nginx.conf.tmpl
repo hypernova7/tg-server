@@ -26,8 +26,8 @@ http {
     }
 
     server { 
-        listen __PORT__;
-        listen [::]:__PORT__;
+        listen %(PORT)%;
+        listen [::]:%(PORT)%;
         server_name _;
 
         sendfile on;

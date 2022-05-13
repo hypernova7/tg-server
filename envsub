@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+""" Template enginer """
+
+from sys import argv
+from os import environ as env, getcwd, path
+import re
+
+
+def repl(matched):
+    """ Replacer callback """
+    name = matched.group(1)
+    env_var = env.get(name)
+    return env_var if env_var else f'%({name})%'
+
+
+if len(argv) > 1:
+    file_path = path.join(getcwd(), argv[1])
+    with open(file_path, mode='r', encoding='utf-8') as f:
+        templ = f.read()
+
+    content = re.sub(r'%\((.+?)\)%', repl, templ, 0, re.MULTILINE)
+    print(content)
+else:
+    print('File not found')
