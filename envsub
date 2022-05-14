@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-""" Template enginer """
+""" Template engineer """
 
 from sys import argv
 from os import environ as env, getcwd, path
+from typing import Match
 import re
 
 
-def repl(matched):
+def repl(matched:Match[str]):
     """ Replacer callback """
     name = matched.group(1)
     env_var = env.get(name)
