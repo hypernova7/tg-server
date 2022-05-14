@@ -20,6 +20,7 @@ errors = {
 # [Parsing] Allowed bots data from env
 # Example: `ALLOWED_BOT_IDS=botid,botid:bottoken,botid,...`
 allowedBotIds = env.get('ALLOWED_BOT_IDS', '').split(',')
+
 # allowedBots = {botid: bot-token}
 allowedBots: Dict[str, Union[str, None]] = {}
 for i in allowedBotIds:
@@ -38,7 +39,7 @@ def sanitize(token: Union[str, None]):
 def is_unauthorized(token: Union[str, None]):
     """ Returns True, if bot is unauthorized """
     bot_id = token.split(':')[0] if token else None
-    return token is None or bot_id not in allowedBotIds
+    return bot_id not in allowedBotIds
 
 
 def make_error(code: int):
@@ -76,7 +77,7 @@ def file(u_path: str):
     """ Handle local files """
     filename, token = get_path_data(u_path)
 
-    if is_unauthorized(token):
+    if token is None or is_unauthorized(token):
         return make_error(401)
 
     # Getting correct filepath for the file
@@ -106,7 +107,7 @@ def api(u_path: str):
     """ Handle all API request """
     __, token = get_path_data(u_path)
 
-    if is_unauthorized(token):
+    if token is None or is_unauthorized(token):
         return make_error(401)
 
     res = request()
