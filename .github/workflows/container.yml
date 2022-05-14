@@ -31,19 +31,19 @@ jobs:
           path: ~/tmp/.cache
           key: ${{ runner.os }}-tg-server-${{ github.sha }}
       - name: Check for telegram-bot-api updates
-        id: check-updates
+        id: tg-update
         run: |
           make update
-          echo ::set-output name=deploy::$([[ -z "$FORCE_DEPLOY" && "$FORCE_DEPLOY" != "true" ]] && echo $([ -z "`git status --porcelain`" ] && echo "false" || echo "true") || echo "true")
+          IS_UPDATE=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
+          echo ::set-output name=deploy::$([ "${FORCE_DEPLOY:-false}" != "true" ] && echo $IS_UPDATE || echo "true")
+          echo ::set-output name=commit::$IS_UPDATE
       - name: Deploy Docker Container to Heroku
-        id: auto-commit-updates
-        if: steps.check-updates.outputs.deploy == 'true'
+        if: steps.tg-update.outputs.deploy == 'true'
         run: |
           heroku container:login
           make release appname=$HEROKU_APP_NAME
-          echo ::set-output name=push::$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
       - name: Auto commit updates
-        if: steps.auto-commit-updates.outputs.push == 'true'
+        if: steps.tg-update.outputs.commit == 'true'
         run: |
             git config --local user.name "Github Action"
             git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
