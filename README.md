@@ -67,10 +67,12 @@ heroku container:release web -a <heroku-app-name>
 
 ### You can deploy your Docker Container to Heroku in a fully automated way, thanks to the power of Github Actions.
 
-This repository already provides a pre-configured Github Action, you just need to clone and create a private repository with all the configuration provided in this repository for your Docker Container. Then simply add the following secrets in `repository settings > secrets` to your private repository.
+This repository already provide a pre-configured Github Action, only you need to clone this repo into a new private repository. Then simply add the following secrets in `Settings > Secrets > Actions`.
 
 
-> **NOTE**: The Github Action provided in this repository is scheduled to check for updates to the `telegram-bot-api` submodule and deploy if there are any changes every day. Optionally, you can add `FORCE_DEPLOY=true` to your repository secrets, to deploy the changes every time you push your own changes **but be careful, the Github Action is scheduled to run every day at 12am UTC**.
+> **NOTE**: The Github Action provided in this repository is scheduled to auto-run every day, and auto-deploy on any updates to the telegram-bot-api submodules. _Optionally, you can add `FORCE_DEPLOY=true` to your repository secrets to force deployment **but be careful, this Github Action is scheduled to auto-run every day at 12am UTC**_.
+
+> **IMPORTANT**: For private repositories, please enable read and write permissions on `Settings > Actions > General > Workflows permissions` for auto commits, to keep your repository up to date on every telegram-bot-api update.
 
 
 ```
