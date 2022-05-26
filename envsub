@@ -7,7 +7,7 @@ from typing import Match
 import re
 
 
-def repl(matched:Match[str]):
+def repl(matched: Match[str]):
     """ Replacer callback """
     name = matched.group(1)
     env_var = env.get(name)

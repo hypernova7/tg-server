@@ -7,14 +7,17 @@ from os import environ as env, path
 from requests import request as got
 from flask import Flask, request as req, send_file
 from flask.json import jsonify
-from flask_cors import CORS
+from flask_cors import cross_origin
 
 # Init
 app: Flask = Flask(__name__)
-CORS(app)
+# Allowed http methods
+methods = ['GET', 'POST', 'OPTIONS']
+# Error lists
 errors = {
     '401': {'ok': False, 'error_code': 401, 'description': 'Unauthorized'},
-    '404': {'ok': False, 'error_code': 404, 'description': 'Not found'}
+    '404': {'ok': False, 'error_code': 404, 'description': 'Not found'},
+    '501': {'ok': False, 'error_code': 501, 'description': 'Not Implemented'}
 }
 
 # [Parsing] Allowed bots data from env
@@ -98,14 +101,28 @@ def file(u_path: str):
         mimetype='application/octet-stream',
         download_name=filename,
         as_attachment=True
-    )
+    ), 200
 
 
 @app.route('/', defaults={'u_path': ''})
-@app.route('/<path:u_path>', methods=['GET', 'POST'])
+@app.route('/<path:u_path>', methods=methods)
+@cross_origin(
+    methods=methods,
+    expose_headers=[
+        'Content-Length',
+        'Content-Type',
+        'Date',
+        'Server',
+        'Connection'
+    ]
+)
 def api(u_path: str):
     """ Handle all API request """
     __, token = get_path_data(u_path)
+
+    # Only specific http methods
+    if req.method not in methods:
+        return make_error(501)
 
     if token is None or is_unauthorized(token):
         return make_error(401)

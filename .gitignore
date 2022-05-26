@@ -1,2 +1,6 @@
+# Development
 *.env
 __pycache__
+# Local logs
+logs
+*.log
