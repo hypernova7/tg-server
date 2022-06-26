@@ -1,4 +1,4 @@
-FROM alpine:3.15 as build
+FROM alpine:latest as build
 
 ENV CXXFLAGS=""
 WORKDIR /telegram-bot-api
@@ -11,7 +11,7 @@ RUN mkdir -p build \
   && cmake --build . --target install -j $(nproc) \
   && strip /telegram-bot-api/bin/telegram-bot-api
 
-FROM alpine:3.15
+FROM alpine:latest
 
 ENV TELEGRAM_WORK_DIR="/file" \
     TELEGRAM_TEMP_DIR="/tmp"
