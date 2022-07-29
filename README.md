@@ -11,7 +11,8 @@
 - Bot restrictions
 - [telegram-bot-api](https://github.com/tdlib/telegram-bot-api) easy build
 - Automated updates and deployment with Github Actions
-- Your own API endpoint(`https://yourdomain.com/bot<token>/getMe`) to have [extra features](https://github.com/tdlib/telegram-bot-api) that the original API does not provide
+- Increase API bot [limits](https://core.telegram.org/bots/api#using-a-local-bot-api-server)
+- Your own API endpoint(`https://yourdomain.com/bot<token>/getMe`)
 
 ## :point_down: Steps
 
@@ -21,7 +22,7 @@
 ### Clone this repository
 
 ```bash
-git clone https://github.com/hypernova7/tg-server.git
+git clone --recursive https://github.com/hypernova7/tg-server.git
 cd tg-server
 ```
 
@@ -60,6 +61,10 @@ make release appname=<heroku-app-name>
 heroku container:push web -a <heroku-app-name>
 heroku container:release web -a <heroku-app-name>
 ```
+
+### :information_source: After the deployment process is finished please read [this](https://github.com/tdlib/telegram-bot-api/#moving-a-bot-from-one-local-server-to-another)
+____
+
 
 
 ## :zap: Automated deployment with Github Actions
