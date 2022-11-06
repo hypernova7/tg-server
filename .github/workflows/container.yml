@@ -35,11 +35,11 @@ jobs:
         run: |
           make update
           IS_UPDATE=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
-          echo ::set-output name=deploy::$([ "${FORCE_DEPLOY:-false}" != "true" ] && echo $IS_UPDATE || echo "true")
-          echo ::set-output name=commit::$IS_UPDATE
+          echo "deploy=$([ "${FORCE_DEPLOY:-false}" != "true" ] && echo $IS_UPDATE || echo "true")" >> $GITHUB_OUTPUT
+          echo "commit=$IS_UPDATE" >> $GITHUB_OUTPUT
           if [[ "$HEROKU_API_KEY" == "" && "$HEROKU_APP_NAME" == "" ]]; then
-            echo ::set-output name=deploy::false
-            echo ::set-output name=commit::false
+            echo "deploy=false" >> $GITHUB_OUTPUT
+            echo "commit=false" >> $GITHUB_OUTPUT
           fi
       - name: Deploy Docker Container to Heroku
         if: steps.tg-update.outputs.deploy == 'true'
