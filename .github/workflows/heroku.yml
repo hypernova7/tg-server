@@ -1,0 +1,57 @@
+name: Docker Container to Heroku
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: "0 0 * * *"
+
+jobs:
+  heroku:
+    runs-on: ubuntu-latest
+    env:
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+      FORCE_DEPLOY: ${{ secrets.FORCE_DEPLOY }} # optional
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Checkout upstream repo
+        uses: actions/checkout@main
+        with:
+          repository: tdlib/telegram-bot-api
+          path: telegram-bot-api
+          submodules: recursive
+      - name: Cache
+        uses: actions/cache@main
+        with:
+          path: ~/tmp/.cache
+          key: ${{ runner.os }}-tg-server-${{ github.sha }}-heroku
+      - name: Check for telegram-bot-api updates
+        id: tg-update
+        run: |
+          if [[ "$HEROKU_API_KEY" != "" && "$HEROKU_APP_NAME" != "" ]]; then
+            make update
+            IS_UPDATE=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
+            echo "deploy=$([ "${FORCE_DEPLOY:-false}" != "true" ] && echo $IS_UPDATE || echo "true")" >> $GITHUB_OUTPUT
+            echo "commit=$IS_UPDATE" >> $GITHUB_OUTPUT
+          else
+            echo "deploy=false" >> $GITHUB_OUTPUT
+            echo "commit=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Deploying to Heroku
+        if: steps.tg-update.outputs.deploy == 'true'
+        run: |
+          heroku container:login
+          make release appname=$HEROKU_APP_NAME
+      - name: Auto commit updates
+        if: steps.tg-update.outputs.commit == 'true'
+        run: |
+            git config --local user.name "Github Action"
+            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -m "Update telegram-bot-api submodules"
+            git push origin main

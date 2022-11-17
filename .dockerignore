@@ -1,3 +1,7 @@
-./data
-.github
+# Development
+*.env
 __pycache__
+test
+# Local logs
+logs
+*.log

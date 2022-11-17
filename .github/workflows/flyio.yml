@@ -1,4 +1,4 @@
-name: Docker Container
+name: Docker Container to Fly.io
 
 on:
   push:
@@ -10,42 +10,43 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  container:
+  flyio:
     runs-on: ubuntu-latest
     env:
-      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       FORCE_DEPLOY: ${{ secrets.FORCE_DEPLOY }} # optional
     steps:
       - name: Checkout
         uses: actions/checkout@main
       - name: Checkout upstream repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@main
         with:
           repository: tdlib/telegram-bot-api
           path: telegram-bot-api
           submodules: recursive
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Cache
         uses: actions/cache@main
         with:
           path: ~/tmp/.cache
-          key: ${{ runner.os }}-tg-server-${{ github.sha }}
+          key: ${{ runner.os }}-tg-server-${{ github.sha }}-flyio
       - name: Check for telegram-bot-api updates
         id: tg-update
         run: |
-          make update
-          IS_UPDATE=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
-          echo "deploy=$([ "${FORCE_DEPLOY:-false}" != "true" ] && echo $IS_UPDATE || echo "true")" >> $GITHUB_OUTPUT
-          echo "commit=$IS_UPDATE" >> $GITHUB_OUTPUT
-          if [[ "$HEROKU_API_KEY" == "" && "$HEROKU_APP_NAME" == "" ]]; then
+          if [[ "$FLY_API_TOKEN" != "" ]]; then
+            make update
+            IS_UPDATE=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
+            echo "deploy=$([ "${FORCE_DEPLOY:-false}" != "true" ] && echo $IS_UPDATE || echo "true")" >> $GITHUB_OUTPUT
+            echo "commit=$IS_UPDATE" >> $GITHUB_OUTPUT
+          else
             echo "deploy=false" >> $GITHUB_OUTPUT
             echo "commit=false" >> $GITHUB_OUTPUT
           fi
-      - name: Deploy Docker Container to Heroku
+      - name: Deploying to Fly.io
         if: steps.tg-update.outputs.deploy == 'true'
         run: |
-          heroku container:login
-          make release appname=$HEROKU_APP_NAME
+          flyctl deploy
       - name: Auto commit updates
         if: steps.tg-update.outputs.commit == 'true'
         run: |
