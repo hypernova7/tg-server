@@ -1,4 +1,4 @@
-name: Docker Container to Heroku
+name: Deploy Docker Container to Heroku
 
 on:
   push:
@@ -15,43 +15,33 @@ jobs:
     env:
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-      FORCE_DEPLOY: ${{ secrets.FORCE_DEPLOY }} # optional
+      FORCE_DEPLOY: ${{ secrets.FORCE_DEPLOY }} # Optional
     steps:
       - name: Checkout
         uses: actions/checkout@main
-      - name: Checkout upstream repo
-        uses: actions/checkout@main
         with:
-          repository: tdlib/telegram-bot-api
-          path: telegram-bot-api
           submodules: recursive
-      - name: Cache
-        uses: actions/cache@main
+          fetch-depth: 0
+      - name: Checkout for updates
+        uses: actions/github-script@main
+        id: status
         with:
-          path: ~/tmp/.cache
-          key: ${{ runner.os }}-tg-server-${{ github.sha }}-heroku
-      - name: Check for telegram-bot-api updates
-        id: tg-update
+          script: require('./scripts/check-for-updates')({ context, core, exec });
+      - name: Deploying to Heroku
+        if: |
+          steps.status.outputs.new_update == 'true'
+            || steps.status.outputs.force_deploy == 'true'
         run: |
           if [[ "$HEROKU_API_KEY" != "" && "$HEROKU_APP_NAME" != "" ]]; then
-            make update
-            IS_UPDATE=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true")
-            echo "deploy=$([ "${FORCE_DEPLOY:-false}" != "true" ] && echo $IS_UPDATE || echo "true")" >> $GITHUB_OUTPUT
-            echo "commit=$IS_UPDATE" >> $GITHUB_OUTPUT
-          else
-            echo "deploy=false" >> $GITHUB_OUTPUT
-            echo "commit=false" >> $GITHUB_OUTPUT
+            heroku container:login
+            heroku container:push web -a $HEROKU_APP_NAME
+            heroku container:release web -a $HEROKU_APP_NAME
           fi
-      - name: Deploying to Heroku
-        if: steps.tg-update.outputs.deploy == 'true'
+      - name: Commit submodule updates
+        if: steps.status.outputs.new_update == 'true'
         run: |
-          heroku container:login
-          make release appname=$HEROKU_APP_NAME
-      - name: Auto commit updates
-        if: steps.tg-update.outputs.commit == 'true'
-        run: |
-            git config --local user.name "Github Action"
-            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name github-actions
+            git config user.email github-actions@github.com
             git add .
-            git commit -m "Update telegram-bot-api submodules"
+            git commit -am "Updated telegram-bot-api submodules" || echo "Nothing to commit"
             git push origin main
