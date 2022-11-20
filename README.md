@@ -23,8 +23,9 @@
 ### Clone this repository
 
 ```bash
-git clone --recursive https://github.com/hypernova7/tg-server.git
+git clone https://github.com/hypernova7/tg-server.git
 cd tg-server
+git submodule update --init --recursive
 ```
 
 
@@ -79,10 +80,7 @@ ____
 ```bash
 # Sign In into Container Registry
 heroku container:login
-# Update, push and deploy your Docker container to heroku
-# NOTE: Maybe you need to install `make`
-make release appname=<heroku-app-name>
-# or run directly
+# Push and deploy Container
 heroku container:push web -a <heroku-app-name>
 heroku container:release web -a <heroku-app-name>
 ```
