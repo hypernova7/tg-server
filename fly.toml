@@ -1,5 +1,8 @@
 app = "<appname>"
 
+[env]
+PORT = 3000
+
 [build]
 dockerfile = "Dockerfile"
 
