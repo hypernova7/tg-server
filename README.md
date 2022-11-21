@@ -104,9 +104,9 @@ ____
 This repository already provides pre-configured Workflows for Heroku(`.github/workflows/heroku.yml`) and fly.io(`.github/workflows/flyio.yml`). You only need to setup the following secrets on `Settings > Secrets > Actions`.
 
 
-> **NOTE**: The provided Workflows in this repository are scheduled to auto-run every day at 12am UTC, and auto-deploy on any updates to the telegram-bot-api submodules. _Optionally, you can add `FORCE_DEPLOY=true` to your repository secrets to force deployment **but remember, this Workflows are scheduled to auto-run every day**_.
+> **NOTE**: Workflows are scheduled to run every day at 12am UTC, and auto-deploy on any updates to the telegram-bot-api submodule. _Optionally, Add `FORCE_DEPLOY=true` to your repository secrets or `_deploy_` to your specific commit message to force the deployment. **But remember, these Workflows runs everyday**_.
 
-> **IMPORTANT**: For private repositories, please enable read and write permissions on `Settings > Actions > General > Workflows permissions` for auto commits, to keep telegram-bot-api submodules updated.
+> **IMPORTANT**: For private repositories, please enable read and write permissions in `Settings > Actions > General > Workflows permissions` for auto commits, to keep telegram-bot-api submodules updated.
 
 
 #### For heroku:
