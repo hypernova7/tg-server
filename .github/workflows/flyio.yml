@@ -25,7 +25,7 @@ jobs:
         uses: actions/github-script@main
         id: status
         with:
-          script: require('./scripts/check-for-updates')({ context, core, exec });
+          script: require('./scripts/check-for-updates')({ context, core, exec, github });
       - name: Installing flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Deploying to Fly.io
