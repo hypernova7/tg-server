@@ -89,6 +89,11 @@ heroku container:release web -a <heroku-app-name>
 
 ```bash
 flyctl deploy
+# Run the following commands only once
+# Since it allocates IP's as many as it runs
+# Please see this https://fly.io/docs/flyctl/ips/#usage
+flyctl ips allocate-v4
+flyctl ips allocate-v6
 ```
 
 > **NOTE**: Before deploying, please read [this](https://github.com/tdlib/telegram-bot-api/#moving-a-bot-from-one-local-server-to-another)
