@@ -17,9 +17,9 @@ ENV TELEGRAM_WORK_DIR="/file" \
     TELEGRAM_TEMP_DIR="/tmp"
 
 RUN apk add --no-cache --update openssl libstdc++ nginx python3 py3-pip uwsgi-python3 uwsgi-http supervisor
-COPY proxy.py /proxy.py
-COPY envsub /usr/local/bin/envsub
-COPY requirements.txt /requirements.txt
+COPY home/proxy.py /home/proxy.py
+COPY home/envsub /usr/local/bin/envsub
+COPY home/requirements.txt /home/requirements.txt
 COPY config/uwsgi.yml /etc/uwsgi/uwsgi.yml
 COPY config/mime.types /etc/nginx/mime.types
 COPY config/nginx.conf.tmpl /etc/nginx/nginx.conf.tmpl
@@ -30,9 +30,12 @@ RUN addgroup -g 777 -S telegram-bot-api \
   && mkdir -p ${TELEGRAM_WORK_DIR} ${TELEGRAM_TEMP_DIR} \
   && chown telegram-bot-api:telegram-bot-api ${TELEGRAM_WORK_DIR} ${TELEGRAM_TEMP_DIR} \
   && mkdir -p /telegram-bot-api/logs \
-  && mkdir -p /run/nginx
-RUN chmod +x /usr/local/bin/envsub \
-  && pip3 install -r /requirements.txt
+  && mkdir -p /run/nginx \
+  && chmod +x /usr/local/bin/envsub \
+  && addgroup -g 888 -S tg-server \
+  && adduser -S -D -H -u 888 -h /home -s /sbin/nologin -G tg-server -g tg-server tg-server \
+  && chown tg-server:tg-server /home /tmp \
+  && pip3 install -r /home/requirements.txt
 
 CMD envsub /etc/nginx/nginx.conf.tmpl > /etc/nginx/nginx.conf \
   && supervisord -c /etc/supervisor/supervisord.conf
