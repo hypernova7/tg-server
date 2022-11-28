@@ -40,17 +40,25 @@ http {
         types_hash_max_size 2048;
         types_hash_bucket_size 64;
         chunked_transfer_encoding on;
-        proxy_connect_timeout 600;
-        proxy_send_timeout 600;
-        proxy_read_timeout 600;
-        send_timeout 600;
+        proxy_connect_timeout 600s;
+        proxy_send_timeout 600s;
+        proxy_read_timeout 600s;
+        send_timeout 600s;
         client_max_body_size 2G;
         client_body_buffer_size 30M;
-        keepalive_timeout 0;
+        keepalive_timeout 0s;
+
+        proxy_buffering on;
+        proxy_http_version 1.1;
 
         # MIME Types
         include mime.types;
         default_type application/octet-stream;
+
+        # Comment out the following lines if your domain is not https
+        if ($http_x_forwarded_proto = "http") {
+          return 301 https://$http_host$request_uri;
+        }
 
         set $sanitized_request $request;
         if ( $sanitized_request ~ (\w+)\s(\/bot\d+):[-\w]+\/(\S+)\s(.*) ) {
@@ -74,6 +82,11 @@ http {
             try_files $uri @api;
         }
 
+        # Docker compose healthcheck
+        location /healthcheck {
+          return 200 "OK";
+        }
+
         location @files {
             root /file;
             gzip on;
@@ -91,7 +104,10 @@ http {
         location @api {
             proxy_pass  http://telegram-bot-api;
             proxy_redirect off;
+            proxy_ssl_protocols TLSv1.2;
+            proxy_ssl_server_name on;
             proxy_set_header Host $host;
+            proxy_set_header Connection "";
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-Host $http_host;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
