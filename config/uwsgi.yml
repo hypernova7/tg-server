@@ -1,10 +1,14 @@
 [uwsgi]
 master = true
-module = proxy:app
+uid = tg-server
+gid = tg-server
+module = home.proxy:app
 socket = 127.0.0.1:8282
 protocol = http
 plugins = python3,http
+post-buffering = 65535
 enable-threads = true
+thunder-lock = true
 vacuum = true                        ; Delete sockets during shutdown
 single-interpreter = true
 die-on-term = true                   ; Shutdown when receiving SIGTERM (default is respawn)
