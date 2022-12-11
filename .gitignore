@@ -5,3 +5,4 @@ test
 # Local logs
 logs
 *.log
+*.binlog
