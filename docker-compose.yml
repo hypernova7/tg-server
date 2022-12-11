@@ -1,16 +1,16 @@
 version: '3'
 services:
   api:
-    restart: always
-    environment:
-      - ALLOWED_BOT_IDS=<bot-tokens>
-      - TELEGRAM_API_HASH=<api-hash>
-      - TELEGRAM_API_ID=<api-id>
-      - EXTRA_ARGS=--local
-      - PORT=8080
+    build: .
+    restart: 'always'
+    env_file: .env
     ports:
       - '8080:8080'
     healthcheck:
-      test: "curl --fail http://127.0.0.1:8080/healthcheck || exit 1"
-    build: .
-
+      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:8080/healthcheck']
+    deploy:
+      resources:
+        limits:
+          memory: '8G'
+          cpus: '0.2'
+    shm_size: '2G'
