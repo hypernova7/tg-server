@@ -4,7 +4,7 @@
 """
 from typing import Union, Dict
 from os import environ as env, path
-from requests import request as got
+import httpx as got
 from flask import Flask, request as req, send_file
 from flask.json import jsonify
 from flask_cors import cross_origin
@@ -53,25 +53,23 @@ def make_error(code: int):
 def get_path_data(u_path: Union[str, None]):
     """ Returns the filename and token from the path """
     path_parts = u_path.split('/') if u_path else [None]
-    filename, token = path_parts[-1], path_parts[0]
+    filename, token = path_parts[-1], path_parts[0] if 'test' not in path_parts[0] else path_parts[1]
     return filename, sanitize(token)
 
 
 def request():
     """ Send all HTTP request to telegram-bot-api local server """
-    # Capture data before cleaning
-    rdata = req.get_data()
     # Fix Content-Type header when opening URL in browser
     content_type = req.headers[
         'Content-Type'
     ] if 'Content-Type' in req.headers else 'application/json'
 
-    return got(
+    return got.request(
         method=req.method,
         url=req.url.replace(req.host_url, 'http://127.0.0.1:8081/'),
         headers={'Content-Type': content_type, 'Connection': 'keep-alive'},
-        params=req.args,
-        data=rdata
+        data=req.get_data(),
+        params=req.args
     )
 
 
