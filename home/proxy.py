@@ -17,7 +17,7 @@ methods = ['GET', 'POST', 'OPTIONS']
 errors = {
     '401': {'ok': False, 'error_code': 401, 'description': 'Unauthorized'},
     '404': {'ok': False, 'error_code': 404, 'description': 'Not found'},
-    '501': {'ok': False, 'error_code': 501, 'description': 'Not Implemented'}
+    '501': {'ok': False, 'error_code': 501, 'description': 'Not Implemented'},
 }
 
 # [Parsing] Allowed bots data from env
@@ -35,47 +35,50 @@ for i in allowedBotIds:
 
 
 def sanitize(token: Union[str, None]):
-    """ Remove bot prefix from URL """
+    """Remove bot prefix from URL"""
     return token if token is None else token.replace('bot', '', 1)
 
 
 def is_unauthorized(token: Union[str, None]):
-    """ Returns True, if bot is unauthorized """
+    """Returns True, if bot is unauthorized"""
     bot_id = token.split(':')[0] if token else None
     return bot_id not in allowedBots
 
 
 def make_error(code: int):
-    """ Make proper API errors """
+    """Make proper API errors"""
     return jsonify(errors[str(code)]), code
 
 
 def get_path_data(u_path: Union[str, None]):
-    """ Returns the filename and token from the path """
+    """Returns the filename and token from the path"""
     path_parts = u_path.split('/') if u_path else [None]
-    filename, token = path_parts[-1], path_parts[0] if 'test' not in path_parts[0] else path_parts[1]
+    filename, token = (
+        path_parts[-1],
+        path_parts[1] if path_parts[0] is not None and 'test' in path_parts[0] else path_parts[0],
+    )
     return filename, sanitize(token)
 
 
 def request():
-    """ Send all HTTP request to telegram-bot-api local server """
+    """Send all HTTP request to telegram-bot-api local server"""
     # Fix Content-Type header when opening URL in browser
-    content_type = req.headers[
-        'Content-Type'
-    ] if 'Content-Type' in req.headers else 'application/json'
+    content_type = (
+        req.headers['Content-Type'] if 'Content-Type' in req.headers else 'application/json'
+    )
 
     return got.request(
         method=req.method,
-        url=req.url.replace(req.host_url, 'http://127.0.0.1:8081/'),
+        url=req.url.replace(req.host_url, 'http://0.0.0.0:8081/'),
         headers={'Content-Type': content_type, 'Connection': 'keep-alive'},
         data=req.get_data(),
-        params=req.args
+        params=req.args,
     )
 
 
 @app.route('/file/<path:u_path>', methods=['GET'])
 def file(u_path: str):
-    """ Handle local files """
+    """Handle local files"""
     filename, token = get_path_data(u_path)
 
     if token is None or is_unauthorized(token):
@@ -94,28 +97,25 @@ def file(u_path: str):
     if not path.exists(file_path):
         return make_error(404)
 
-    return send_file(
-        path_or_file=file_path,
-        mimetype='application/octet-stream',
-        download_name=filename,
-        as_attachment=True
-    ), 200
+    return (
+        send_file(
+            path_or_file=file_path,
+            mimetype='application/octet-stream',
+            download_name=filename,
+            as_attachment=True,
+        ),
+        200,
+    )
 
 
 @app.route('/', defaults={'u_path': ''})
 @app.route('/<path:u_path>', methods=methods)
 @cross_origin(
     methods=methods,
-    expose_headers=[
-        'Content-Length',
-        'Content-Type',
-        'Date',
-        'Server',
-        'Connection'
-    ]
+    expose_headers=['Content-Length', 'Content-Type', 'Date', 'Server', 'Connection'],
 )
 def api(u_path: str):
-    """ Handle all API request """
+    """Handle all API request"""
     __, token = get_path_data(u_path)
 
     # Only specific http methods
@@ -130,4 +130,4 @@ def api(u_path: str):
 
 
 if __name__ == '__main__':
-    app.run(port=8282)
+    app.run(host='0.0.0.0')
