@@ -13,4 +13,9 @@ services:
         limits:
           memory: '8G'
           cpus: '0.2'
+    volumes:
+      - file:/file
     shm_size: '2G'
+
+volumes:
+  file:
