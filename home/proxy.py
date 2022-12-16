@@ -55,7 +55,7 @@ def get_path_data(u_path: Union[str, None]):
     path_parts = u_path.split('/') if u_path else [None]
     filename, token = (
         path_parts[-1],
-        path_parts[1] if path_parts[0] is not None and 'test' in path_parts[0] else path_parts[0],
+        path_parts[0],
     )
     return filename, sanitize(token)
 
