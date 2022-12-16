@@ -1,6 +1,7 @@
 # Development
 *.env
 __pycache__
+target
 test
 # Local logs
 logs
