@@ -1,8 +1,14 @@
 # Development
+.vscode
+.github
 *.env
-__pycache__
-target
+*.temp
+scripts
+venv
 test
+target
+__pycache__
+
 # Local logs
 logs
 *.log
