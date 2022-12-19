@@ -3,7 +3,9 @@ FROM alpine:latest as build
 ENV CXXFLAGS=""
 WORKDIR /telegram-bot-api
 
-RUN apk add --no-cache --update alpine-sdk linux-headers git zlib-dev openssl-dev gperf cmake
+RUN apk add --no-cache --update \
+  alpine-sdk linux-headers openssl-dev \
+  git zlib-dev gperf cmake
 COPY telegram-bot-api /telegram-bot-api
 RUN mkdir -p build \
   && cd build \
@@ -16,11 +18,13 @@ FROM alpine:latest
 ENV TELEGRAM_WORK_DIR="/file" \
     TELEGRAM_TEMP_DIR="/tmp"
 
-RUN apk add --no-cache --update openssl libstdc++ nginx python3 py3-pip uwsgi-python3 uwsgi-http supervisor curl
+RUN apk add --no-cache --update \
+  alpine-sdk linux-headers openssl \
+  libstdc++ nginx python3 python3-dev py3-pip uwsgi-python3 uwsgi-http supervisor
 COPY --from=build /telegram-bot-api/bin/telegram-bot-api /usr/local/bin/telegram-bot-api
+COPY init-server.sh /init-server.sh
 COPY home/proxy.py /home/proxy.py
 COPY home/requirements.txt /home/requirements.txt
-COPY init-server.sh /init-server.sh
 COPY home/envsub /usr/local/bin/envsub
 COPY config/uwsgi.yml /etc/uwsgi/uwsgi.yml
 COPY config/mime.types /etc/nginx/mime.types
