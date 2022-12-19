@@ -65,13 +65,13 @@ http {
             set $sanitized_request "$1 $2:<hidden-token>/$3 $4";
         }
 
-        # https://appname.herokuapp.com/file/bot<token>/documents/file_0
+        # <host>/file/bot<token>/documents/file_0
         location ~* \/file\/bot\d+:(.*) {
             rewrite ^/file\/bot(.*) /$1 break;
             try_files $uri @files;
         }
 
-        # https://appname.herokuapp.com/file/<token>/documents/file_0
+        # <host>/file/<token>/documents/file_0
         location ~* \/file\/\d+:(.*) {
             rewrite ^/file\/(.*) /$1 break;
             try_files $uri @files;
