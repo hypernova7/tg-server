@@ -4,13 +4,18 @@
 """
 from typing import Union, Dict
 from os import environ as env, path
-import httpx as got
+import httpx
 from flask import Flask, request as req, send_file
 from flask.json import jsonify
 from flask_cors import cross_origin
 
 # Init
 app: Flask = Flask(__name__)
+# Setup httpx
+got = httpx.Client(
+    limits=httpx.Limits(max_keepalive_connections=None, max_connections=None),
+    timeout=None,
+)
 # Allowed http methods
 methods = ['GET', 'POST', 'OPTIONS']
 # Error lists
@@ -53,10 +58,7 @@ def make_error(code: int):
 def get_path_data(u_path: Union[str, None]):
     """Returns the filename and token from the path"""
     path_parts = u_path.split('/') if u_path else [None]
-    filename, token = (
-        path_parts[-1],
-        path_parts[0],
-    )
+    filename, token = (path_parts[-1], path_parts[0])
     return filename, sanitize(token)
 
 
