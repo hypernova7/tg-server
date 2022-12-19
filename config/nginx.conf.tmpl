@@ -47,6 +47,10 @@ http {
         client_body_buffer_size 30M;
         keepalive_timeout 0s;
 
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+
         # MIME Types
         include mime.types;
         default_type application/octet-stream;
