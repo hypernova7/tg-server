@@ -1,9 +1,7 @@
 # Development
 .vscode
-.github
 *.env
 *.temp
-scripts
 venv
 test
 target
