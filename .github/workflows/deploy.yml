@@ -51,9 +51,8 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Deploying to Fly.io
         if: |
-          needs.checkout.outputs.new_update == 'true'
-            || needs.checkout.outputs.force_deploy == 'true'
-              && env.FLY_API_TOKEN != ''
+          (needs.checkout.outputs.new_update == 'true' || needs.checkout.outputs.force_deploy == 'true')
+            && env.FLY_API_TOKEN != ''
         run: flyctl deploy
   heroku:
     permissions:
@@ -72,10 +71,8 @@ jobs:
           fetch-depth: 0
       - name: Deploying to Heroku
         if: |
-          needs.checkout.outputs.new_update == 'true'
-            || needs.checkout.outputs.force_deploy == 'true'
-              && env.HEROKU_APP_NAME != ''
-                && env.HEROKU_API_KEY != ''
+          (needs.checkout.outputs.new_update == 'true' || needs.checkout.outputs.force_deploy == 'true')
+            && (env.HEROKU_APP_NAME != '' && env.HEROKU_API_KEY != '')
         run: |
           heroku container:login
           heroku container:push web -a $HEROKU_APP_NAME
@@ -95,8 +92,9 @@ jobs:
       - name: Commit submodule updates
         if: needs.checkout.outputs.new_update == 'true'
         run: |
+            VERSION=$(cat telegram-bot-api/CMakeLists.txt | grep TelegramBotApi | cut -d " " -f3)
             git config user.name github-actions
             git config user.email github-actions@github.com
             git add .
-            git commit -am "Updated telegram-bot-api submodules" || echo "Nothing to commit"
+            git commit -am "Updated telegram-bot-api submodules to ${VERSION}" || echo "Nothing to commit"
             git push origin main
