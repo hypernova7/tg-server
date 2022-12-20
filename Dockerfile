@@ -19,8 +19,9 @@ ENV TELEGRAM_WORK_DIR="/file" \
     TELEGRAM_TEMP_DIR="/tmp"
 
 RUN apk add --no-cache --update \
-  alpine-sdk linux-headers openssl \
-  libstdc++ nginx python3 python3-dev py3-pip uwsgi-python3 uwsgi-http supervisor
+  openssl libstdc++ nginx supervisor\
+  python3 py3-pip \
+  uwsgi-python3 uwsgi-http
 COPY --from=build /telegram-bot-api/bin/telegram-bot-api /usr/local/bin/telegram-bot-api
 COPY init-server.sh /init-server.sh
 COPY home/proxy.py /home/proxy.py
