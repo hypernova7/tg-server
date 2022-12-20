@@ -20,7 +20,7 @@ ENV TELEGRAM_WORK_DIR="/file" \
 
 RUN apk add --no-cache --update \
   openssl libstdc++ nginx supervisor\
-  python3 py3-pip \
+  curl python3 py3-pip \
   uwsgi-python3 uwsgi-http
 COPY --from=build /telegram-bot-api/bin/telegram-bot-api /usr/local/bin/telegram-bot-api
 COPY init-server.sh /init-server.sh
