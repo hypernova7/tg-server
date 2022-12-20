@@ -1,0 +1,4 @@
+flask==2.*
+flask-cors==3.*
+# httpx is not stable yet
+httpx~=0.23.1

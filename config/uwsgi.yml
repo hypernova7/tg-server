@@ -1,10 +1,14 @@
 [uwsgi]
 master = true
-module = proxy:app
-socket = 127.0.0.1:8282
+uid = telegram-bot-api
+gid = telegram-bot-api
+module = home.proxy:app
+socket = 0.0.0.0:8282
 protocol = http
 plugins = python3,http
+post-buffering = 65535
 enable-threads = true
+thunder-lock = true
 vacuum = true                        ; Delete sockets during shutdown
 single-interpreter = true
 die-on-term = true                   ; Shutdown when receiving SIGTERM (default is respawn)
@@ -22,7 +26,7 @@ max-worker-lifetime = 3600           ; Restart workers after this many seconds
 reload-on-rss = 2048                 ; Restart workers after this much resident memory
 worker-reload-mercy = 60             ; How long to wait before forcefully killing workers
 
-cheaper-algo = busyness
+cheaper-algo = spare
 processes = 128                      ; Maximum number of workers allowed
 cheaper = 8                          ; Minimum number of workers allowed
 cheaper-initial = 16                 ; Workers created at startup

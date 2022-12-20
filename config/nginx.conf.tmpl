@@ -5,66 +5,73 @@ worker_processes 8;
 worker_rlimit_nofile 65535;
 
 events {
-  use epoll;
-  accept_mutex on;
-  multi_accept on;
-  worker_connections 65535;
+    use epoll;
+    accept_mutex on;
+    multi_accept on;
+    worker_connections 65535;
 }
 
 http {
-
     server_tokens off;
 
     # use $sanitized_request instead of $request to hide Telegram token
-    log_format token_filter '$remote_addr - $remote_user [$time_local] '
-        '"$sanitized_request" $status $body_bytes_sent '
-        '"$http_referer" "$http_user_agent"';
+    log_format cloudflare
+        '$remote_addr - $remote_user [$time_local] '
+        '"$sanitized_request" $status $body_bytes_sent "$http_referer" '
+        '"$http_user_agent" $http_cf_ray $http_cf_connecting_ip '
+        '$http_x_forwarded_for $http_x_forwarded_proto $http_true_client_ip '
+        '$http_cf_ipcountry $http_cf_visitor $http_cdn_loop';
 
-    upstream telegram-bot-api {
+    upstream api {
         ip_hash;
-        server 127.0.0.1:8282;
+        server 0.0.0.0:8282;
     }
 
     # DNS over HTTPS
-    resolver 1.1.1.1 1.0.0.1 [2606:4700:4700::1111] [2606:4700:4700::1001] 8.8.8.8 8.8.4.4 [2001:4860:4860::8888] [2001:4860:4860::8844] 208.67.222.222 208.67.220.220 [2620:119:35::35] [2620:119:53::53] 9.9.9.9 149.112.112.112 [2620:fe::fe] [2620:fe::9] valid=60s;
+    resolver
+        1.1.1.1 1.0.0.1 [2606:4700:4700::1111] [2606:4700:4700::1001] # Cloudflare DNS resolver
+        8.8.8.8 8.8.4.4 [2001:4860:4860::8888] [2001:4860:4860::8844] # Google DNS resolver
+        208.67.222.222 208.67.220.220 [2620:119:35::35] [2620:119:53::53] # OpenDNS resolver
+        9.9.9.9 149.112.112.112 [2620:fe::fe] [2620:fe::9] # Quad9 DNS resolver
+        valid=60s;
     resolver_timeout 2s;
 
     server { 
+        server_name _;
         listen %(PORT)%;
         listen [::]:%(PORT)%;
-        server_name _;
+
+        chunked_transfer_encoding on;
+        send_timeout 600s;
+        client_max_body_size 2G;
+        client_body_buffer_size 30M;
+        keepalive_timeout 0s;
 
         sendfile on;
         tcp_nopush on;
         tcp_nodelay on;
-        types_hash_max_size 2048;
-        types_hash_bucket_size 64;
-        chunked_transfer_encoding on;
-        proxy_connect_timeout 600;
-        proxy_send_timeout 600;
-        proxy_read_timeout 600;
-        send_timeout 600;
-        client_max_body_size 2G;
-        client_body_buffer_size 30M;
-        keepalive_timeout 0;
 
         # MIME Types
         include mime.types;
         default_type application/octet-stream;
 
+        # Comment out the following lines if your domain is not https
+        if ($http_x_forwarded_proto = "http") {
+            return 301 https://$http_host$request_uri;
+        }
+
         set $sanitized_request $request;
         if ( $sanitized_request ~ (\w+)\s(\/bot\d+):[-\w]+\/(\S+)\s(.*) ) {
             set $sanitized_request "$1 $2:<hidden-token>/$3 $4";
         }
-        access_log /var/log/nginx/access.log token_filter;
 
-        # https://appname.herokuapp.com/file/bot<token>/documents/file_0
+        # <host>/file/bot<token>/documents/file_0
         location ~* \/file\/bot\d+:(.*) {
             rewrite ^/file\/bot(.*) /$1 break;
             try_files $uri @files;
         }
 
-        # https://appname.herokuapp.com/file/<token>/documents/file_0
+        # <host>/file/<token>/documents/file_0
         location ~* \/file\/\d+:(.*) {
             rewrite ^/file\/(.*) /$1 break;
             try_files $uri @files;
@@ -89,14 +96,42 @@ http {
         }
 
         location @api {
-            proxy_pass  http://telegram-bot-api;
+            proxy_pass http://api;
+
+            proxy_buffering on;
             proxy_redirect off;
+
+            proxy_ssl_protocols TLSv1.2;
+            proxy_ssl_server_name on;
+
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header Connection "keep-alive";
             proxy_set_header X-Forwarded-Host $http_host;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-            add_header 'Strict-Transport-Security' 'max-age=31536000; includeSubDomains; preload';
+            proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+
+            proxy_connect_timeout 600s;
+            proxy_send_timeout 600s;
+            proxy_read_timeout 600s;
+            proxy_http_version 1.1;
         }
+
+        location /favicon.ico {
+            log_not_found off;
+            access_log off;
+        }
+
+        # Docker compose healthcheck
+        location /healthcheck {
+            return 200 "OK\n";
+        }
+
+        add_header X-XSS-Protection '1; mode=block' always;
+        add_header X-Content-Type-Options 'nosniff' always;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
+
+        access_log /var/log/nginx/access.log cloudflare buffer=512k flush=1m;
     }
 }

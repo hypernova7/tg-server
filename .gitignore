@@ -1,7 +1,13 @@
 # Development
+.vscode
 *.env
-__pycache__
+*.temp
+venv
 test
+target
+__pycache__
+
 # Local logs
 logs
 *.log
+*.binlog
