@@ -124,6 +124,7 @@ http {
 
         # Docker compose healthcheck
         location /healthcheck {
+            add_header 'Content-Type' 'text/plain';
             return 200 "OK\n";
         }
 
