@@ -20,6 +20,8 @@ jobs:
     outputs:
       new_update: ${{ steps.status.outputs.new_update }}
       force_deploy: ${{ steps.status.outputs.force_deploy }}
+      current_version: ${{ steps.status.outputs.current_version }}
+      new_version: ${{ steps.status.outputs.new_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@main
@@ -92,9 +94,10 @@ jobs:
       - name: Commit submodule updates
         if: needs.checkout.outputs.new_update == 'true'
         run: |
-            VERSION=$(cat telegram-bot-api/CMakeLists.txt | grep TelegramBotApi | cut -d " " -f3)
+            CURRENT_VERSION=${{ needs.checkout.outputs.current_version }}
+            NEW_VERSION=${{ needs.checkout.outputs.new_version }}
             git config user.name github-actions
             git config user.email github-actions@github.com
             git add .
-            git commit -am "Updated telegram-bot-api submodules to ${VERSION}" || echo "Nothing to commit"
+            git commit -am "Updated telegram-bot-api submodules from v${CURRENT_VERSION} to v${NEW_VERSION}" || echo "Nothing to commit"
             git push origin main

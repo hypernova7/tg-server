@@ -1,3 +1,20 @@
+const getVersion = async (exec) => {
+  let version = '0.0.0';
+
+  try {
+    // Try to get telegram-bot-api version
+    await exec.exec('sed -n "s/.*TelegramBotApi VERSION \\([^ ]*\\).*/\\1/p" telegram-bot-api/CMakeLists.txt', [], {
+      listeners: {
+        stdout: (data) => {
+          version = data.toString();
+        }
+      }
+    });
+  } catch {}
+
+  return version.trim();
+};
+
 module.exports = async ({ context, core, exec, github }) => {
   const limit = 1000 * 60 * 60 * 24; // 24hrs in milliseconds
 
@@ -28,12 +45,19 @@ module.exports = async ({ context, core, exec, github }) => {
     core.warning('A forced deployment will occur');
   }
 
+  // Set the current version of telegram-bot-api submodule
+  const current_version = await getVersion(exec);
+  core.setOutput('current_version', current_version);
+
   // Try to update the telegram-api-bot submodule,
   // in order to deploy the Docker Container to Heroku or Fly.io
-  await exec.exec('git', ['submodule', 'update', '--remote'], {
+  await exec.exec('git submodule update --remote', [], {
     listeners: {
-      stdout: () => {
+      stdout: async () => {
         core.setOutput('new_update', 'true');
+        // Set the new version of telegram-bot-api submodule
+        const new_version = await getVersion(exec);
+        core.setOutput('new_version', new_version);
       }
     }
   });
