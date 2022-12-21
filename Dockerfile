@@ -19,9 +19,9 @@ ENV TELEGRAM_WORK_DIR="/file" \
     TELEGRAM_TEMP_DIR="/tmp"
 
 RUN apk add --no-cache --update \
-  openssl libstdc++ nginx supervisor\
+  openssl libstdc++ nginx supervisor \
   curl python3 py3-pip \
-  uwsgi-python3 uwsgi-http
+  uwsgi-python3
 COPY --from=build /telegram-bot-api/bin/telegram-bot-api /usr/local/bin/telegram-bot-api
 COPY init-server.sh /init-server.sh
 COPY home/proxy.py /home/proxy.py
@@ -29,6 +29,7 @@ COPY home/requirements.txt /home/requirements.txt
 COPY home/envsub /usr/local/bin/envsub
 COPY config/uwsgi.yml /etc/uwsgi/uwsgi.yml
 COPY config/mime.types /etc/nginx/mime.types
+COPY config/uwsgi_params /etc/nginx/uwsgi_params
 COPY config/nginx.conf.tmpl /etc/nginx/nginx.conf.tmpl
 COPY config/supervisord.conf /etc/supervisor/supervisord.conf
 RUN addgroup -g 777 -S telegram-bot-api \

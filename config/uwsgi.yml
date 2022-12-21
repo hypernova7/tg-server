@@ -4,8 +4,7 @@ uid = telegram-bot-api
 gid = telegram-bot-api
 module = home.proxy:app
 socket = 0.0.0.0:8282
-protocol = http
-plugins = python3,http
+plugins = python3
 post-buffering = 65535
 enable-threads = true
 thunder-lock = true
@@ -14,7 +13,7 @@ single-interpreter = true
 die-on-term = true                   ; Shutdown when receiving SIGTERM (default is respawn)
 need-app = true
 
-disable-logging = true               ; Disable built-in logging 
+disable-logging = true               ; Disable built-in logging
 log-4xx = true                       ; but log 4xx's anyway
 log-5xx = true                       ; and 5xx's
 
