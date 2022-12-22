@@ -13,6 +13,7 @@ events {
 }
 
 http {
+    charset utf-8;
     sendfile on;
     tcp_nopush on;
     tcp_nodelay on;
@@ -43,7 +44,7 @@ http {
 
     upstream socket {
         ip_hash;
-        server 0.0.0.0:8282;
+        server unix:/tmp/tg-server.sock;
     }
 
     # DNS over HTTPS
