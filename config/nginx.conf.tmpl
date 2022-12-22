@@ -13,7 +13,19 @@ events {
 }
 
 http {
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
     server_tokens off;
+    chunked_transfer_encoding on;
+    client_body_buffer_size 30M;
+    client_max_body_size 2G;
+    keepalive_timeout 0s;
+    send_timeout 600s;
+
+    # MIME Types
+    include mime.types;
+    default_type application/octet-stream;
 
     # Use $sanitized_request instead of $request to hide Telegram token
     log_format cloudflare
@@ -48,20 +60,6 @@ http {
         listen %(PORT)% reuseport;
         listen [::]:%(PORT)% reuseport;
 
-        chunked_transfer_encoding on;
-        send_timeout 600s;
-        client_max_body_size 2G;
-        client_body_buffer_size 30M;
-        keepalive_timeout 0s;
-
-        sendfile on;
-        tcp_nopush on;
-        tcp_nodelay on;
-
-        # MIME Types
-        include mime.types;
-        default_type application/octet-stream;
-
         # Comment out the following lines if your domain is not https
         if ($http_x_forwarded_proto = "http") {
             return 301 https://$http_host$request_uri;
@@ -71,6 +69,8 @@ http {
         if ( $sanitized_request ~ (\w+)\s(\/bot\d+):[-\w]+\/(\S+)\s(.*) ) {
             set $sanitized_request "$1 $2:<hidden-token>/$3 $4";
         }
+
+        access_log /var/log/nginx/access.log cloudflare buffer=512k flush=1m;
 
         # <host>/file/bot<token>/documents/file_0
         location ~* \/file\/bot\d+:(.*) {
@@ -134,12 +134,5 @@ http {
             add_header 'Content-Type' 'text/plain';
             return 200 "OK\n";
         }
-
-        add_header X-XSS-Protection '1; mode=block' always;
-        add_header X-Content-Type-Options 'nosniff' always;
-        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-        add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload' always;
-
-        access_log /var/log/nginx/access.log cloudflare buffer=512k flush=1m;
     }
 }
