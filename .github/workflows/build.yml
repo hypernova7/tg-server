@@ -54,9 +54,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@master
+        if: needs.checkout.outputs.new_update == 'true'
         with:
+          push: true
           platforms: linux/386,linux/amd64
-          push: ${{ needs.checkout.outputs.new_update }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           tags: |
