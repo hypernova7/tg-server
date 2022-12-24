@@ -1,3 +1,14 @@
+<p align="center">
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/v/tgserver/tgserver?colorA=363a4f&colorB=89b4fa&logo=docker&logoColor=fff&style=for-the-badge"></a>
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/image-size/tgserver/tgserver?colorA=363a4f&colorB=89b4fa&label=size&logo=docker&logoColor=fff&style=for-the-badge"></a>
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/pulls/tgserver/tgserver?colorA=363a4f&colorB=b4befe&label=pulls&logo=docker&logoColor=fff&style=for-the-badge"></a>
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/stars/tgserver/tgserver?colorA=363a4f&colorB=f9e2af&label=stars&logo=docker&logoColor=fff&style=for-the-badge"></a>
+</p>
+<p align="center">
+  <a href="https://github.com/hypernova7/tg-server/issues"><img src="https://img.shields.io/github/issues/hypernova7/tg-server?colorA=363a4f&colorB=f5a97f&logo=github&style=for-the-badge"></a>
+  <a href="https://github.com/hypernova7/tg-server/contributors"><img src="https://img.shields.io/github/contributors/hypernova7/tg-server?colorA=363a4f&colorB=a6da95&logo=github&style=for-the-badge"></a>
+</p>
+
 # Deploy your own [Telegram Bot API](https://github.com/tdlib/telegram-bot-api)
 
 
@@ -70,6 +81,12 @@ flyctl secrets set TELEGRAM_API_ID=<api-id> TELEGRAM_API_HASH=<api-hash> -a <her
 # NOTE: To pass extra arguments to telegram-bot-api, you can add the environment var EXTRA_ARGS
 flyctl secrets set EXTRA_ARGS="--proxy=<proxy> --local" -a <heroku-app-name>
 ```
+
+> **NOTE**: Optionally and if required, you can set the SWAP_SIZE environment variable, by default is 0. Example: `SWAP_SIZE=200M` or `SWAP_SIZE=4G` or `SWAP_SIZE=8589934592` (`8589934592` = `8G` in bytes)
+> > You can use this prefixes:
+> > - k or K = Kilobytes
+> > - m o M = Megabytes
+> > - g or G = Gigabytes
 
 ____
 
