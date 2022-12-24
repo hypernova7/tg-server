@@ -35,6 +35,7 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+    environment: Docker Hub
     needs: checkout
     steps:
       - name: Cache Docker layers

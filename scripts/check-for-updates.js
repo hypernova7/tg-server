@@ -49,6 +49,10 @@ module.exports = async ({ context, core, exec, github }) => {
   const current_version = await getVersion(exec);
   core.setOutput('current_version', current_version);
 
+  // Needed for build workflow
+  core.setOutput('new_version', current_version);
+  core.setOutput('new_update', 'false');
+
   // Try to update the telegram-api-bot submodule,
   // in order to deploy the Docker Container to Heroku or Fly.io
   await exec.exec('git submodule update --remote', [], {
