@@ -37,8 +37,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: Docker Hub
     needs: checkout
+    env:
+      DOCKERHUB_LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
-      - name: Cache Docker layers
+      - name: Cache Docker Layers
         uses: actions/cache@main
         with:
           path: /tmp/.buildx-cache
@@ -47,12 +50,13 @@ jobs:
         uses: docker/setup-qemu-action@master
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@master
-      - name: Login to DockerHub
+      - name: Login to Docker Hub
         uses: docker/login-action@master
+        if: env.DOCKERHUB_LOGIN != '' && env.DOCKERHUB_TOKEN != ''
         with:
-          username: ${{ secrets.DOCKERHUB_LOGIN }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
+          username: ${{ env.DOCKERHUB_LOGIN }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+      - name: Build and push to Docker Hub
         uses: docker/build-push-action@master
         if: needs.checkout.outputs.new_update == 'true'
         with:
