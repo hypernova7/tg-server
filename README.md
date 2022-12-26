@@ -1,12 +1,13 @@
 <p align="center">
-  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/v/tgserver/tgserver?colorA=363a4f&colorB=89b4fa&logo=docker&logoColor=fff&style=for-the-badge"></a>
-  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/image-size/tgserver/tgserver?colorA=363a4f&colorB=89b4fa&label=size&logo=docker&logoColor=fff&style=for-the-badge"></a>
-  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/pulls/tgserver/tgserver?colorA=363a4f&colorB=b4befe&label=pulls&logo=docker&logoColor=fff&style=for-the-badge"></a>
-  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/stars/tgserver/tgserver?colorA=363a4f&colorB=f9e2af&label=stars&logo=docker&logoColor=fff&style=for-the-badge"></a>
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/v/tgserver/tgserver?colorA=363a4f&colorB=89b4fa&logo=docker&logoColor=fff&sort=semver&style=for-the-badge" alt="Docker Image Version"></a>
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/image-size/tgserver/tgserver?colorA=363a4f&colorB=94e2d5&label=size&logo=docker&logoColor=fff&sort=semver&style=for-the-badge" alt="Dcoker Image Size"></a>
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/pulls/tgserver/tgserver?colorA=363a4f&colorB=b4befe&label=pulls&logo=docker&logoColor=fff&sort=semver&style=for-the-badge" alt="Docker Image Pulls"></a>
+  <a href="https://hub.docker.com/r/tgserver/tgserver"><img src="https://img.shields.io/docker/stars/tgserver/tgserver?colorA=363a4f&colorB=f9e2af&label=stars&logo=docker&logoColor=fff&sort=semver&style=for-the-badge" alt="Docker Image Stars"></a>
 </p>
 <p align="center">
-  <a href="https://github.com/hypernova7/tg-server/issues"><img src="https://img.shields.io/github/issues/hypernova7/tg-server?colorA=363a4f&colorB=f5a97f&logo=github&style=for-the-badge"></a>
-  <a href="https://github.com/hypernova7/tg-server/contributors"><img src="https://img.shields.io/github/contributors/hypernova7/tg-server?colorA=363a4f&colorB=a6da95&logo=github&style=for-the-badge"></a>
+  <a href="https://github.com/hypernova7/tg-server/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/hypernova7/tg-server/build.yml?colorA=363a4f&logo=github&style=for-the-badge" alt="Build Status"></a>
+  <a href="https://github.com/hypernova7/tg-server/issues"><img src="https://img.shields.io/github/issues/hypernova7/tg-server?colorA=363a4f&colorB=fab387&logo=github&style=for-the-badge" alt="Issues"></a>
+  <a href="https://github.com/hypernova7/tg-server/contributors"><img src="https://img.shields.io/github/contributors/hypernova7/tg-server?colorA=363a4f&colorB=cba6f7&logo=github&style=for-the-badge" alt="Contributors"></a>
 </p>
 
 # Deploy your own [Telegram Bot API](https://github.com/tdlib/telegram-bot-api)
