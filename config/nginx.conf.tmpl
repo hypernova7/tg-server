@@ -125,15 +125,15 @@ http {
             uwsgi_read_timeout 600s;
         }
 
-        location /favicon.ico {
+        location = /favicon.ico {
             log_not_found off;
             access_log off;
         }
 
         # Docker compose healthcheck
-        location /healthcheck {
-            add_header 'Content-Type' 'text/plain';
-            return 200 "OK\n";
+        location = /healthcheck {
+            add_header 'Content-Type' 'application/json';
+            return 200 '{"ok":true,"code":200,"description":"OK"}';
         }
     }
 }

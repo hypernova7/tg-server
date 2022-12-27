@@ -35,4 +35,4 @@ fi
 # Replace environment variables
 envsub /etc/nginx/nginx.conf.tmpl > /etc/nginx/nginx.conf
 # Start services
-supervisord -c /etc/supervisor/supervisord.conf
+supervisord -c /etc/supervisord.conf

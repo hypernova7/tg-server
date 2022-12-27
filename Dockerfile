@@ -27,11 +27,9 @@ COPY init-server.sh /init-server.sh
 COPY home/proxy.py /home/proxy.py
 COPY home/requirements.txt /home/requirements.txt
 COPY home/envsub /usr/local/bin/envsub
-COPY config/uwsgi.yml /etc/uwsgi/uwsgi.yml
-COPY config/mime.types /etc/nginx/mime.types
-COPY config/uwsgi_params /etc/nginx/uwsgi_params
+COPY config/uwsgi.ini /etc/uwsgi/uwsgi.ini
 COPY config/nginx.conf.tmpl /etc/nginx/nginx.conf.tmpl
-COPY config/supervisord.conf /etc/supervisor/supervisord.conf
+COPY config/supervisord.conf /etc/supervisord.conf
 RUN addgroup -g 777 -S telegram-bot-api \
   && adduser -S -D -H -u 777 -h ${TELEGRAM_WORK_DIR} -s /sbin/nologin -G telegram-bot-api -g telegram-bot-api telegram-bot-api \
   && mkdir -p ${TELEGRAM_WORK_DIR} ${TELEGRAM_TEMP_DIR} /run/nginx /logs \
