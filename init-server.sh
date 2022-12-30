@@ -14,12 +14,20 @@ SWAP_SIZE=${SWAP_SIZE:-0}                                                     # 
 # Convert human readable size to bytes                                        (Source: https://stackoverflow.com/a/26621833)
 size_to_bytes() {
   echo $1 | awk \
-    '/[0-9]$/{print $1;next};
+    '/^-/{print "NEGATIVE_VALUE";next};
+    /[0-9]$/{print $1;next};
     /[gG]$/{printf "%u", $1*(1024*1024*1024);next};
     /[mM]$/{printf "%u", $1*(1024*1024);next};
     /[kK]$/{printf "%u", $1*1024;next}'
 }
+
 SWAP_SIZE_IN_BYTES=`size_to_bytes $SWAP_SIZE`
+
+# Check if SWAP_SIZE has negative values, if so then set SWAP_SIZE to 0
+if [ "$SWAP_SIZE_IN_BYTES" = "NEGATIVE_VALUE" ]; then
+  echo "ERROR: Negative values are not allowed."
+  SWAP_SIZE_IN_BYTES=0
+fi
 
 # Setup swap file if SWAP_SIZE_IN_BYTES is greater than 0
 if [ $SWAP_SIZE_IN_BYTES -ne 0 ]; then
