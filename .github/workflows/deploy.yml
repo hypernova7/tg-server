@@ -53,7 +53,9 @@ jobs:
         if: |
           (needs.checkout.outputs.new_update == 'true' || needs.checkout.outputs.force_deploy == 'true')
             && env.FLY_API_TOKEN != ''
-        run: flyctl deploy
+        run: |
+          git submodule update --remote
+          flyctl deploy
   heroku:
     permissions:
       contents: read
@@ -74,6 +76,7 @@ jobs:
           (needs.checkout.outputs.new_update == 'true' || needs.checkout.outputs.force_deploy == 'true')
             && (env.HEROKU_APP_NAME != '' && env.HEROKU_API_KEY != '')
         run: |
+          git submodule update --remote
           heroku container:login
           heroku container:push web -a $HEROKU_APP_NAME
           heroku container:release web -a $HEROKU_APP_NAME
