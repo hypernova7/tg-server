@@ -44,18 +44,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
+      - name: Checkout upstream repo
+        uses: actions/checkout@main
         with:
+          repository: tdlib/telegram-bot-api
+          path: telegram-bot-api
           submodules: recursive
-          fetch-depth: 0
       - name: Installing flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Deploying to Fly.io
         if: |
           (needs.checkout.outputs.new_update == 'true' || needs.checkout.outputs.force_deploy == 'true')
             && env.FLY_API_TOKEN != ''
-        run: |
-          git submodule update --remote
-          flyctl deploy
+        run: flyctl deploy
   heroku:
     permissions:
       contents: read
@@ -68,15 +69,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
+      - name: Checkout upstream repo
+        uses: actions/checkout@main
         with:
+          repository: tdlib/telegram-bot-api
+          path: telegram-bot-api
           submodules: recursive
-          fetch-depth: 0
       - name: Deploying to Heroku
         if: |
           (needs.checkout.outputs.new_update == 'true' || needs.checkout.outputs.force_deploy == 'true')
             && (env.HEROKU_APP_NAME != '' && env.HEROKU_API_KEY != '')
         run: |
-          git submodule update --remote
           heroku container:login
           heroku container:push web -a $HEROKU_APP_NAME
           heroku container:release web -a $HEROKU_APP_NAME
