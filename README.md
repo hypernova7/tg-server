@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hypernova7/tg-server/actions/workflows/build.yml"><img src="https://workflow-status.deta.dev/hypernova7/tg-server/build.yml?colorA=363a4f&greenColor=a6e3a1&redColor=f38ba8&orangeColor=fab387&otherColor=cdd6f4&logo=github&style=for-the-badge" alt="Build Status"></a>
+  <a href="https://github.com/hypernova7/tg-server/actions/workflows/ci.yml"><img src="https://badge.deta.dev/hypernova7/tg-server/ci.yml?colorA=363a4f&greenColor=a6e3a1&redColor=f38ba8&orangeColor=fab387&otherColor=cdd6f4&label=build&logo=github&style=for-the-badge" alt="Build Status"></a>
   <a href="https://github.com/hypernova7/tg-server/issues"><img src="https://img.shields.io/github/issues/hypernova7/tg-server?colorA=363a4f&colorB=fab387&logo=github&style=for-the-badge" alt="Issues"></a>
   <a href="https://github.com/hypernova7/tg-server/contributors"><img src="https://img.shields.io/github/contributors/hypernova7/tg-server?colorA=363a4f&colorB=cba6f7&logo=github&style=for-the-badge" alt="Contributors"></a>
   <a href="https://github.com/hypernova7/tg-server/stargazers"><img src="https://img.shields.io/github/stars/hypernova7/tg-server?colorA=363a4f&colorB=f5e0dc&logo=github&style=for-the-badge" alt="Stars"></a>
