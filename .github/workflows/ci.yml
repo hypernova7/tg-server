@@ -59,6 +59,14 @@ jobs:
         uses: docker/setup-qemu-action@master
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@master
+      - name: Docker Metadata
+        uses: docker/metadata-action@master
+        if: needs.checkout.outputs.new_update == 'true'
+        id: meta
+        with:
+          images: tgserver/tgserver
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.checkout.outputs.new_version }}
       - name: Login to Docker Hub
         uses: docker/login-action@master
         if: env.DOCKERHUB_LOGIN != '' && env.DOCKERHUB_TOKEN != ''
@@ -75,9 +83,8 @@ jobs:
           platforms: linux/386,linux/amd64
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
-          tags: |
-            tgserver/tgserver:latest
-            tgserver/tgserver:${{ needs.checkout.outputs.new_version }}
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
   commit:
     permissions:
       contents: write
