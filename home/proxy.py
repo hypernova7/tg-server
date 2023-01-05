@@ -118,7 +118,7 @@ def file(u_path: str):
 )
 def api(u_path: str):
     """Handle all API request"""
-    __, token = get_path_data(u_path)
+    method, token = get_path_data(u_path)
 
     # Only specific http methods
     if req.method not in methods:
@@ -128,7 +128,14 @@ def api(u_path: str):
         return make_error(401)
 
     res = request()
-    return jsonify(res.json()), res.status_code
+    data = res.json()
+
+    if method.startswith('getFile') and data['result']:
+        # Print relative file path instead of absolute file path on json response
+        file_path_parts = data['result']['file_path'].split('/')
+        data['result']['file_path'] = '/'.join(file_path_parts[-2:])
+
+    return jsonify(data), res.status_code
 
 
 if __name__ == '__main__':
