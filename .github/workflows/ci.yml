@@ -69,7 +69,9 @@ jobs:
             type=semver,pattern={{version}},value=${{ needs.checkout.outputs.new_version }}
       - name: Login to Docker Hub
         uses: docker/login-action@master
-        if: env.DOCKERHUB_LOGIN != '' && env.DOCKERHUB_TOKEN != ''
+        if: |
+          needs.checkout.outputs.new_update == 'true'
+            && (env.DOCKERHUB_LOGIN != '' && env.DOCKERHUB_TOKEN != '')
         with:
           username: ${{ env.DOCKERHUB_LOGIN }}
           password: ${{ env.DOCKERHUB_TOKEN }}
@@ -108,8 +110,7 @@ jobs:
             git config user.name github-actions[bot]
             git config user.email github-actions[bot]@users.noreply.github.com
             git add .
-            git commit \
+            git diff-index --quiet HEAD || git commit \
               -am "Updated telegram-bot-api submodules from v${CURRENT_VERSION} to v${NEW_VERSION}" \
-              -am "Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>" || echo \
-              "Nothing to commit"
+              -am "Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
             git push origin main
