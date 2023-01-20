@@ -18,8 +18,14 @@ if len(argv) > 1:
     file_path = path.join(getcwd(), argv[1])
     with open(file_path, mode='r', encoding='utf-8') as f:
         templ = f.read()
-
-    content = re.sub(r'%\((.+?)\)%', repl, templ, 0, re.MULTILINE)
+    content = re.sub(
+        r'%\((.+?)\)%', 
+        repl,
+        templ,
+        0,
+        re.MULTILINE
+    )
     print(content)
+
 else:
     print('File not found')

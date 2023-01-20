@@ -25,7 +25,7 @@ SWAP_SIZE_IN_BYTES=`size_to_bytes $SWAP_SIZE`
 
 # Check if SWAP_SIZE has negative values, if so then set SWAP_SIZE to 0
 if [ "$SWAP_SIZE_IN_BYTES" = "NEGATIVE_VALUE" ]; then
-  echo "SWAP_SIZE_ERROR: Negative values are not allowed."
+  echo "[SWAP_SIZE Error]: Negative values are not allowed."
   SWAP_SIZE_IN_BYTES=0
 fi
 
