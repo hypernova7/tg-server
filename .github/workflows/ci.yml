@@ -67,7 +67,8 @@ jobs:
           images: tgserver/tgserver
           tags: |
             type=schedule,pattern=${{ needs.checkout.outputs.new_version }}
-            type=semver,pattern={{version}},value=${{ needs.checkout.outputs.new_version }}
+            type=raw,value=${{ needs.checkout.outputs.new_version }}
+            type=raw,value=latest
       - name: Login to Docker Hub
         uses: docker/login-action@master
         if: |
