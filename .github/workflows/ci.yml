@@ -83,12 +83,14 @@ jobs:
           needs.checkout.outputs.new_update == 'true'
             && (env.DOCKERHUB_LOGIN != '' && env.DOCKERHUB_TOKEN != '')
         with:
-          push: true
+          context: .
+          file: ./Dockerfile
           platforms: linux/386,linux/amd64
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
+          push: true
   commit:
     permissions:
       contents: write

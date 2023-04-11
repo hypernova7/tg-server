@@ -1,11 +1,11 @@
 FROM alpine:latest as build
 
-ENV CXXFLAGS=""
+ENV CXXFLAGS="-fuse-ld=mold"
 WORKDIR /telegram-bot-api
 
 RUN apk add --no-cache --update \
   alpine-sdk linux-headers openssl-dev \
-  git zlib-dev gperf cmake
+  git zlib-dev gperf cmake mold
 COPY telegram-bot-api /telegram-bot-api
 RUN mkdir -p build \
   && cd build \
