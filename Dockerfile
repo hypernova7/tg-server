@@ -1,4 +1,4 @@
-FROM alpine:latest as build
+FROM alpine:3.18.3 as build
 
 ENV CXXFLAGS="-fuse-ld=mold"
 WORKDIR /telegram-bot-api
@@ -15,7 +15,7 @@ RUN mkdir -p build \
 
 
 
-FROM alpine:latest
+FROM alpine:3.18.3
 
 ENV TELEGRAM_WORK_DIR="/file" \
     TELEGRAM_TEMP_DIR="/tmp" \
