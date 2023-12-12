@@ -135,5 +135,7 @@ http {
             add_header 'Content-Type' 'application/json';
             return 200 '{"ok":true,"code":200,"description":"OK"}';
         }
+
+        include /etc/nginx/conf.d/*.conf;
     }
 }

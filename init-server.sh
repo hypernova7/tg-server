@@ -36,6 +36,10 @@ if [ $SWAP_SIZE_IN_BYTES -ne 0 ]; then
   swapon _swapfile                                                              # Enable swap
 fi
 
+if [ ! -z "$STATS_PATH_NAME" ]; then
+  # Setup telegram-bot-api stats nginx location
+  echo -e "location = /${STATS_PATH_NAME} {\n\tproxy_pass http://0.0.0.0:8083;\n}" > /etc/nginx/conf.d/stats-location.conf
+fi
 
 ## ------------------------------------------------ PROGRAM ------------------------------------------------ ##
 envsub /etc/nginx/nginx.conf.tmpl > /etc/nginx/nginx.conf                       # Replace environment variables

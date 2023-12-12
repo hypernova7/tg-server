@@ -28,7 +28,9 @@ RUN apk add --no-cache --update \
   nginx \
   openssl \
   python3 \
-  py3-pip \
+  py3-flask \
+  py3-flask-cors \
+  py3-httpx \
   supervisor \
   uwsgi-python3
 
@@ -43,10 +45,9 @@ COPY config/supervisord.conf /etc/supervisord.conf
 
 RUN addgroup -g 777 -S ${MACHINE_GROUPNAME} \
   && adduser -S -D -H -u 777 -h ${TELEGRAM_WORK_DIR} -s /sbin/nologin -G ${MACHINE_GROUPNAME} -g ${MACHINE_GROUPNAME} ${MACHINE_USERNAME} \
-  && mkdir -p ${TELEGRAM_WORK_DIR} ${TELEGRAM_TEMP_DIR} /run/nginx /logs \
+  && mkdir -p ${TELEGRAM_WORK_DIR} ${TELEGRAM_TEMP_DIR} /run/nginx /etc/nginx/conf.d /logs \
   && chown -R ${MACHINE_USERNAME}:${MACHINE_GROUPNAME} ${TELEGRAM_WORK_DIR} ${TELEGRAM_TEMP_DIR} \
-  && chmod +x /usr/local/bin/envsub /init-server.sh \
-  && pip3 install -qr /home/requirements.txt
+  && chmod +x /usr/local/bin/envsub /init-server.sh
 
 EXPOSE 8080/tcp
 ENTRYPOINT /init-server.sh
