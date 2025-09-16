@@ -1,5 +1,5 @@
 import { createReadStream } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join, normalize } from 'node:path';
 import process from 'node:process';
 import { fileTypeFromFile } from 'file-type';
 import got, { type Method } from 'got';
@@ -14,8 +14,6 @@ const app = new H3();
 
 const verifyJWToken = (token: string, secret: string): Promise<JWTVerifyResult<JWTPayload>> =>
   jwtVerify(token, new TextEncoder().encode(secret));
-const setResponseHeader = (event: H3Event<EventHandlerRequest>, name: string, value: string) =>
-  event.res.headers.set(name, value);
 
 // Example to encrypt your bot token
 // import { SignJWT, type JWTPayload, type JWTVerifyResult } from 'jose';
@@ -32,10 +30,48 @@ const setResponseHeader = (event: H3Event<EventHandlerRequest>, name: string, va
 //   bot_token: 'Your bot token'
 // }, TELEGRAM_API_SECRET, '12h'));
 
+const setResponseHeader = (event: H3Event<EventHandlerRequest>, name: string, value: string) =>
+  event.res.headers.set(name, value);
+
+const authHandler = async (
+  event: H3Event<EventHandlerRequest>,
+  authorization: string | null,
+  bot_token: string | undefined
+) => {
+  try {
+    if (!authorization?.startsWith('Bearer')) {
+      setResponseHeader(event, 'Content-Type', 'application/json');
+      throw new HTTPError({
+        status: 401,
+        statusText: 'Unauthorized',
+        message: 'Missing auth token'
+      });
+    }
+    const token = authorization.replace('Bearer', '').trim();
+    const { payload }: { payload: Record<string, any> } = await verifyJWToken(
+      token,
+      TELEGRAM_API_SECRET
+    );
+    if (payload.bot_token !== undefined && payload.bot_token !== bot_token) {
+      throw new HTTPError({
+        status: 401,
+        statusText: 'Unauthorized',
+        message: 'Invalid bot token'
+      });
+    }
+  } catch {
+    throw new HTTPError({
+      status: 401,
+      statusText: 'Unauthorized',
+      message: 'Invalid auth token'
+    });
+  }
+};
+
 app.all('/**', async event => {
+  const headers = event.req.headers;
   const json = await readBody(event);
   const method = event.req.method as Method;
-  const headers = event.req.headers as any;
   const { host, pathname } = new URL(event.req.url);
   const searchParams = event.url.searchParams;
   const authorization = headers.get('authorization');
@@ -51,49 +87,28 @@ app.all('/**', async event => {
     });
   }
 
-  const work_dir = TELEGRAM_WORK_DIR ? join(TELEGRAM_WORK_DIR, bot_token, '/') : '';
+  const work_dir = TELEGRAM_WORK_DIR ? normalize(join(TELEGRAM_WORK_DIR, bot_token, '/')) : '';
+  const isFileRoute = url.includes('/file');
 
-  try {
-    if (!url.includes('/file')) {
-      if (!authorization?.startsWith('Bearer')) {
-        setResponseHeader(event, 'Content-Type', 'application/json');
-        throw new HTTPError({
-          status: 401,
-          statusText: 'Unauthorized',
-          message: 'Missing auth token'
-        });
-      }
-      const token = authorization.replace('Bearer', '').trim();
-      const { payload }: { payload: Record<string, any> } = await verifyJWToken(
-        token,
-        TELEGRAM_API_SECRET
-      );
-      if (!payload.bot_token?.includes(bot_token)) {
-        throw new HTTPError({
-          status: 401,
-          statusText: 'Unauthorized',
-          message: 'Invalid bot token'
-        });
-      }
-    }
-  } catch {
-    throw new HTTPError({
-      status: 401,
-      statusText: 'Unauthorized',
-      message: 'Invalid auth token'
-    });
+  if (!isFileRoute) {
+    await authHandler(event, authorization, bot_token);
   }
 
-  const res = (await got(url, {
-    throwHttpErrors: false,
-    searchParams,
-    headers,
-    method,
-    json
-  }).json()) as Record<string, any>;
-
-  if (!url.includes('/file')) {
+  if (!isFileRoute) {
     setResponseHeader(event, 'Content-Type', 'application/json');
+
+    const res = (await got(url, {
+      throwHttpErrors: false,
+      headers: {
+        authorization: authorization as string,
+        'content-type': headers.get('content-type') as string,
+        'user-agent': headers.get('user-agent') as string
+      },
+      searchParams,
+      method,
+      json,
+      timeout: { request: 10_000 }
+    }).json()) as Record<string, any>;
 
     if (res.error_code) {
       throw new HTTPError({
@@ -110,7 +125,16 @@ app.all('/**', async event => {
     return res;
   } else if (path_parts.length > 2) {
     const [, , ...path_parts2] = path_parts;
-    const file_path = join(work_dir, path_parts2.join('/'));
+    const file_path = normalize(join(work_dir, path_parts2.join('/')));
+
+    if (!file_path.startsWith(work_dir)) {
+      throw new HTTPError({
+        status: 400,
+        statusText: 'Bad request',
+        message: 'Invalid file path'
+      });
+    }
+
     const { ext, mime } = (await fileTypeFromFile(file_path)) ?? {
       ext: 'bin',
       mime: 'application/octet-stream'
@@ -119,7 +143,7 @@ app.all('/**', async event => {
     setResponseHeader(
       event,
       'Content-Disposition',
-      `attachment; filename=${path_parts.pop()}.${ext}`
+      `attachment; filename=${basename(file_path)}.${ext}`
     );
     return createReadStream(file_path);
   } else {

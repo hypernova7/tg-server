@@ -1,34 +1,36 @@
 {
-    auto_https disable_redirects
-    order rewrite before respond
+	auto_https disable_redirects
+	order rewrite before respond
 }
 
 :8080 {
-    encode {
-        zstd
-        gzip 9
-    }
+	encode {
+		zstd
+		gzip 9
+	}
 
-    # Force HTTPS if X-Forwarded-Proto = http
-    @insecure header X-Forwarded-Proto http
-    redir @insecure https://{host}{uri}
+	# Force HTTPS if X-Forwarded-Proto = http
+	@insecure header X-Forwarded-Proto http
+	redir @insecure https://{host}{uri}
 
-    # Healthcheck
-    handle /healthcheck {
-        header Content-Type application/json
-        respond `{"ok":true,"status_code":200,"description":"OK"}`
-    }
+	# Healthcheck
+	handle /healthcheck {
+		header Content-Type application/json
+		respond `{"ok":true,"status_code":200,"description":"OK"}`
+	}
 
-    handle {
-        reverse_proxy :8082 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
-            header_up Upgrade {>Upgrade}
-            header_up Connection {>Connection}
-        }
+	handle {
+		reverse_proxy :8082 {
+			header_up Host {host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+			header_up Upgrade {>Upgrade}
+			header_up Connection {>Connection}
+			header_up X-Content-Type-Options nosniff
+			header_up X-Frame-Options DENY
+		}
 
-        file_server
-    }
+		file_server
+	}
 }
