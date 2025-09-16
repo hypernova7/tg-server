@@ -1,0 +1,10 @@
+# Development
+.vscode
+*.env
+node_modules
+telegram-bot-api/build
+
+# Local logs
+logs
+*.log
+*.binlog

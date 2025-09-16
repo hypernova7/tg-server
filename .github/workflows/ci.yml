@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    # Runs at 12am UTC
+    - cron: '0 0 * * *'
+
+permissions: {}
+jobs:
+  checkout:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      new_update: ${{ steps.status.outputs.new_update }}
+      current_version: ${{ steps.status.outputs.current_version }}
+      new_version: ${{ steps.status.outputs.new_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Checkout for updates
+        uses: actions/github-script@main
+        id: status
+        with:
+          script: |
+            const checkForUpdates = require('./scripts/check-for-updates');
+            await checkForUpdates({ core, exec });
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    environment: Docker Hub
+    needs: checkout
+    env:
+      DOCKERHUB_LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Checkout upstream repo
+        uses: actions/checkout@main
+        with:
+          repository: tdlib/telegram-bot-api
+          path: telegram-bot-api
+          submodules: recursive
+      - name: Cache Docker Layers
+        uses: actions/cache@main
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@master
+      - name: Docker Metadata
+        uses: docker/metadata-action@master
+        if: needs.checkout.outputs.new_update == 'true'
+        id: meta
+        with:
+          images: tgserver/tgserver
+          tags: |
+            type=schedule,pattern=${{ needs.checkout.outputs.new_version }}
+            type=raw,value=${{ needs.checkout.outputs.new_version }}
+            type=raw,value=latest
+      - name: Login to Docker Hub
+        uses: docker/login-action@master
+        if: |
+          needs.checkout.outputs.new_update == 'true'
+            && (env.DOCKERHUB_LOGIN != '' && env.DOCKERHUB_TOKEN != '')
+        with:
+          username: ${{ env.DOCKERHUB_LOGIN }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@master
+        if: |
+          needs.checkout.outputs.new_update == 'true'
+            && (env.DOCKERHUB_LOGIN != '' && env.DOCKERHUB_TOKEN != '')
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/386,linux/amd64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          push: true
+  commit:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    needs: [checkout, build]
+    if: ${{ always() }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Checkout upstream repo
+        uses: actions/checkout@main
+        with:
+          repository: tdlib/telegram-bot-api
+          path: telegram-bot-api
+          submodules: recursive
+      - name: Commit submodule updates
+        if: needs.checkout.outputs.new_update == 'true'
+        run: |
+          CURRENT_VERSION=${{ needs.checkout.outputs.current_version }}
+          NEW_VERSION=${{ needs.checkout.outputs.new_version }}
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+          git add telegram-bot-api
+          git diff-index --quiet HEAD || git commit \
+            -am "Updated telegram-bot-api submodules from v${CURRENT_VERSION} to v${NEW_VERSION}" \
+            -am "Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          git push origin main
