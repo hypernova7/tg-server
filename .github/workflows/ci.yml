@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - v2
   workflow_dispatch:
   schedule:
     # Runs at 12am UTC
@@ -30,7 +30,7 @@ jobs:
         id: status
         with:
           script: |
-            const checkForUpdates = require('./scripts/check-for-updates');
+            const checkForUpdates = require('./scripts/check-for-updates.cjs');
             await checkForUpdates({ core, exec });
   build:
     permissions:
@@ -117,4 +117,4 @@ jobs:
           git diff-index --quiet HEAD || git commit \
             -am "Updated telegram-bot-api submodules from v${CURRENT_VERSION} to v${NEW_VERSION}" \
             -am "Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
-          git push origin main
+          git push origin v2
