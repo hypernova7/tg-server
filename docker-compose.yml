@@ -1,4 +1,4 @@
-# For local deploy
+# For local build and deploy
 name: tgserver
 
 services:
