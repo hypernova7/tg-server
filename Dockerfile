@@ -36,5 +36,5 @@ RUN addgroup -g 777 -S ${MACHINE_GROUPNAME} \
   && chown -R ${MACHINE_USERNAME}:${MACHINE_GROUPNAME} ${TELEGRAM_WORK_DIR} ${TELEGRAM_TEMP_DIR} \
   && bun install --production
 
-EXPOSE 8080/tcp
+EXPOSE 8383/tcp
 ENTRYPOINT ["supervisord", "-c", "/etc/supervisord.conf"]
