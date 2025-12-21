@@ -49,9 +49,9 @@ services:
     env_file: .env
     restart: always
     ports:
-      - '8080:8080'
+      - '8383:8383'
     healthcheck:
-      test: [CMD, curl, -f, 'http://127.0.0.1:8080/healthcheck']
+      test: [CMD, curl, -f, 'http://127.0.0.1:8383/healthcheck']
     volumes:
       - file:/file
 
